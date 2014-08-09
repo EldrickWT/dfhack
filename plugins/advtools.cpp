@@ -243,13 +243,13 @@ void changeGroupLeader(df::nemesis_record *new_nemesis, df::nemesis_record *old_
 
 void copyAcquaintances(df::nemesis_record *new_nemesis, df::nemesis_record *old_nemesis)
 {
-    auto &svec = old_nemesis->unit->adventurer_knows;
-    auto &tvec = new_nemesis->unit->adventurer_knows;
+    //auto &svec = old_nemesis->unit->adventurer_knows;
+    //auto &tvec = new_nemesis->unit->adventurer_knows;
 
-    for (unsigned i = 0; i < svec.size(); i++)
-        insert_into_vector(tvec, svec[i]);
+    //for (unsigned i = 0; i < svec.size(); i++)
+    //    insert_into_vector(tvec, svec[i]);
 
-    insert_into_vector(tvec, old_nemesis->unit_id);
+    //insert_into_vector(tvec, old_nemesis->unit_id);
 }
 
 void sortCompanionNemesis(std::vector<nemesis_record*> *list, int player_id = -1)

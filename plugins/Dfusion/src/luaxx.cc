@@ -22,6 +22,7 @@
  * IN THE SOFTWARE.
  */
 
+#include "Pragma.h"
 #include <luaxx.hpp>
 #include <iostream>
 #define LOG std::cout

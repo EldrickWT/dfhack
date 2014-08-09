@@ -1138,8 +1138,8 @@ public:
         job_to_labor_table[df::job_type::StoreItemInStockpile]	= jlf_hauling;
         job_to_labor_table[df::job_type::StoreItemInBag]		= jlf_hauling;
         job_to_labor_table[df::job_type::StoreItemInHospital]	= jlf_hauling;
-        job_to_labor_table[df::job_type::StoreItemInChest]		= jlf_hauling;
-        job_to_labor_table[df::job_type::StoreItemInCabinet]	= jlf_hauling;
+//        job_to_labor_table[df::job_type::StoreItemInChest]		= jlf_hauling;
+//        job_to_labor_table[df::job_type::StoreItemInCabinet]	= jlf_hauling;
         job_to_labor_table[df::job_type::StoreWeapon]			= jlf_hauling;
         job_to_labor_table[df::job_type::StoreArmor]			= jlf_hauling;
         job_to_labor_table[df::job_type::StoreItemInBarrel]		= jlf_hauling;
@@ -1210,7 +1210,7 @@ public:
         job_to_labor_table[df::job_type::MilkCreature]			= jlf_const(df::unit_labor::MILK);
         job_to_labor_table[df::job_type::MakeCheese]			= jlf_const(df::unit_labor::MAKE_CHEESE);
         job_to_labor_table[df::job_type::ProcessPlants]			= jlf_const(df::unit_labor::PROCESS_PLANT);
-        job_to_labor_table[df::job_type::ProcessPlantsBag]		= jlf_const(df::unit_labor::PROCESS_PLANT);
+//        job_to_labor_table[df::job_type::ProcessPlantsBag]		= jlf_const(df::unit_labor::PROCESS_PLANT);
         job_to_labor_table[df::job_type::ProcessPlantsVial]		= jlf_const(df::unit_labor::PROCESS_PLANT);
         job_to_labor_table[df::job_type::ProcessPlantsBarrel]	= jlf_const(df::unit_labor::PROCESS_PLANT);
         job_to_labor_table[df::job_type::PrepareMeal]			= jlf_const(df::unit_labor::COOK);
@@ -1248,7 +1248,7 @@ public:
         job_to_labor_table[df::job_type::CastSpell]				= jlf_no_labor;
         job_to_labor_table[df::job_type::LinkBuildingToTrigger] = jlf_const(df::unit_labor::MECHANIC) ;
         job_to_labor_table[df::job_type::PullLever]				= jlf_no_labor;
-        job_to_labor_table[df::job_type::BrewDrink]				= jlf_const(df::unit_labor::BREWER) ;
+//        job_to_labor_table[df::job_type::BrewDrink]				= jlf_const(df::unit_labor::BREWER) ;
         job_to_labor_table[df::job_type::ExtractFromPlants]		= jlf_const(df::unit_labor::HERBALIST) ;
         job_to_labor_table[df::job_type::ExtractFromRawFish]	= jlf_const(df::unit_labor::DISSECT_FISH) ;
         job_to_labor_table[df::job_type::ExtractFromLandAnimal] = jlf_const(df::unit_labor::DISSECT_VERMIN) ;
@@ -1326,9 +1326,9 @@ public:
         job_to_labor_table[df::job_type::ExecuteCriminal]		= jlf_no_labor;
         job_to_labor_table[df::job_type::TrainAnimal]			= jlf_const(df::unit_labor::ANIMALTRAIN);
         job_to_labor_table[df::job_type::CarveTrack]			= jlf_const(df::unit_labor::DETAIL);
-        job_to_labor_table[df::job_type::PushTrackVehicle]		= jlf_const(df::unit_labor::PUSH_HAUL_VEHICLE);
-        job_to_labor_table[df::job_type::PlaceTrackVehicle]		= jlf_const(df::unit_labor::PUSH_HAUL_VEHICLE);
-        job_to_labor_table[df::job_type::StoreItemInVehicle]    = jlf_const(df::unit_labor::PUSH_HAUL_VEHICLE);
+        job_to_labor_table[df::job_type::PushTrackVehicle]		= jlf_const(df::unit_labor::HANDLE_VEHICLES);
+        job_to_labor_table[df::job_type::PlaceTrackVehicle]		= jlf_const(df::unit_labor::HANDLE_VEHICLES);
+        job_to_labor_table[df::job_type::StoreItemInVehicle]    = jlf_const(df::unit_labor::HANDLE_VEHICLES);
     };
 
     df::unit_labor find_job_labor(df::job* j)
@@ -1644,8 +1644,14 @@ private:
                         df::tiletype_shape tts = ENUM_ATTR(tiletype, shape, tt);
                         switch (tts) 
                         {
-                        case df::enums::tiletype_shape::TREE:
+                        case df::enums::tiletype_shape::TRUNK_BRANCH:
                             tree_count++; break;
+/* Probably need to account for everything else in some way... BUT TREE => TRUNK_BRANCH sound plausible as a fix.
+    if ( shape2 == df::enums::tiletype_shape::BRANCH ||
+         shape2 == df::enums::tiletype_shape::TRUNK_BRANCH ||
+         shape2 == df::enums::tiletype_shape::TWIG )
+        return -1;
+*/
                         case df::enums::tiletype_shape::SHRUB:
                             plant_count++; break;
                         default:
@@ -2095,7 +2101,7 @@ public:
 
         for (auto v = world->vehicles.all.begin(); v != world->vehicles.all.end(); v++)
             if ((*v)->route_id != -1) 
-                labor_needed[df::unit_labor::PUSH_HAUL_VEHICLE]++;
+                labor_needed[df::unit_labor::HANDLE_VEHICLES]++;
 
         // add fishing & hunting
 

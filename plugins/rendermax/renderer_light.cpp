@@ -750,19 +750,19 @@ void lightingEngineViewscreen::doOcupancyAndLights()
         }
         
         //plants
-        for(int i=0;i<block->plants.size();i++)
-        {
-            df::plant* cPlant=block->plants[i];
-            if (cPlant->grow_counter <180000) //todo maybe smaller light/oclusion?
-                continue;
-            df::coord2d pos=cPlant->pos;
-            pos=worldToViewportCoord(pos,vp,window2d);
-            int tile=getIndex(pos.x,pos.y);
-            if(isInRect(pos,vp))
-            {
-                applyMaterial(tile,419,cPlant->material);
-            }
-        }
+        //for(int i=0;i<block->plants.size();i++)
+        //{
+        //    df::plant* cPlant=block->plants[i];
+        //    if (cPlant->grow_counter <180000) //todo maybe smaller light/oclusion?
+        //        continue;
+        //    df::coord2d pos=cPlant->pos;
+        //    pos=worldToViewportCoord(pos,vp,window2d);
+        //    int tile=getIndex(pos.x,pos.y);
+        //    if(isInRect(pos,vp))
+        //    {
+        //        applyMaterial(tile,419,cPlant->material);
+        //    }
+        //}
         //blood and other goo
         for(int i=0;i<block->block_events.size();i++)
         {

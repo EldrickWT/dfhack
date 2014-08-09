@@ -158,7 +158,9 @@ function reaction_entry(job_type, values, name)
     end
     
     return {
-        name = name or df.job_type.attrs[job_type].caption,
+        --name = name or df.job_type.attrs_entry_type[job_type].caption,
+        --name = name or df.job_type.attrs[job_type].caption, -- Original
+        name = name or dfhack.job.getName(job_type),
         order = order,
     }
 end
@@ -341,7 +343,7 @@ function collect_reactions()
     table.insert(result, reaction_entry(job_types.PrepareMeal, {mat_type = 4}, "Prepare Lavish Meal"))
     
     -- Brew Drink
-    table.insert(result, reaction_entry(job_types.BrewDrink))
+--    table.insert(result, reaction_entry(job_types.BrewDrink))
     
     -- Weaving
     table.insert(result, reaction_entry(job_types.WeaveCloth, {material_category = {plant = true}}, "Weave Thread into Cloth"))
@@ -359,7 +361,7 @@ function collect_reactions()
     table.insert(result, reaction_entry(job_types.SpinThread))
     table.insert(result, reaction_entry(job_types.MakeLye))
     table.insert(result, reaction_entry(job_types.ProcessPlants))
-    table.insert(result, reaction_entry(job_types.ProcessPlantsBag))
+--    table.insert(result, reaction_entry(job_types.ProcessPlantsBag))
     table.insert(result, reaction_entry(job_types.ProcessPlantsVial))
     table.insert(result, reaction_entry(job_types.ProcessPlantsBarrel))
     table.insert(result, reaction_entry(job_types.MakeCharcoal))

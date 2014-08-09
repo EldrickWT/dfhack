@@ -508,12 +508,12 @@ static bool try_store_item(df::building *target, df::item *item)
             job->job_type = job_type::StoreArmor;
             job->flags.bits.specific_dropoff = true;
             break;
-        case building_type::Cabinet:
-            job->job_type = job_type::StoreItemInCabinet;
-            dest = true;
-            break;
+//        case building_type::Cabinet:
+//            job->job_type = job_type::StoreItemInCabinet;
+//            dest = true;
+//            break;
         default:
-            job->job_type = job_type::StoreItemInChest;
+            job->job_type = job_type::StoreItemInStockpile;
             dest = true;
             break;
     }

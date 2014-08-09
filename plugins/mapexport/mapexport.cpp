@@ -284,21 +284,21 @@ command_result mapexport (color_ostream &out, std::vector <std::string> & parame
 
                 if (b->getRaw())
                 {
-                    PlantList *plants = &b->getRaw()->plants;
-                    for (PlantList::const_iterator it = plants->begin(); it != plants->end(); it++)
-                    {
-                        const df::plant & plant = *(*it);
-                        df::coord2d loc(plant.pos.x, plant.pos.y);
-                        loc = loc % 16;
-                        if (showHidden || !b->DesignationAt(loc).bits.hidden)
-                        {
-                            dfproto::Plant *protoplant = protoblock.add_plant();
-                            protoplant->set_x(loc.x);
-                            protoplant->set_y(loc.y);
-                            protoplant->set_is_shrub(plant.flags.bits.is_shrub);
-                            protoplant->set_material(plant.material);
-                        }
-                    }
+                    //PlantList *plants = &b->getRaw()->plants;
+                    //for (PlantList::const_iterator it = plants->begin(); it != plants->end(); it++)
+                    //{
+                    //    const df::plant & plant = *(*it);
+                    //    df::coord2d loc(plant.pos.x, plant.pos.y);
+                    //    loc = loc % 16;
+                    //    if (showHidden || !b->DesignationAt(loc).bits.hidden)
+                    //    {
+                    //        dfproto::Plant *protoplant = protoblock.add_plant();
+                    //        protoplant->set_x(loc.x);
+                    //        protoplant->set_y(loc.y);
+                    //        protoplant->set_is_shrub(plant.flags.bits.is_shrub);
+                    //        protoplant->set_material(plant.material);
+                    //    }
+                    //}
                 }
                 
                 coded_output->WriteVarint32(protoblock.ByteSize());

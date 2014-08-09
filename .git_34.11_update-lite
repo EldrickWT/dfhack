@@ -1,0 +1,20 @@
+git stash save
+cd plugins/df2mc
+git checkout master
+git pull
+cd ../..
+cd plugins/stonesense
+git checkout master
+git pull
+cd ../..
+cd library/xml
+git checkout master
+git pull
+cd ../..
+cd depends/clsocket
+git checkout master
+git pull
+cd ../..
+git checkout master
+git pull origin master
+

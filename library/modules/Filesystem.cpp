@@ -48,6 +48,7 @@ SOFTWARE.
 #include <string>
 
 #include "modules/Filesystem.h"
+#include "Pragma.h"
 
 bool DFHack::Filesystem::chdir (std::string path)
 {

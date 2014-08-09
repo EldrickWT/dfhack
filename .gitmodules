@@ -1,9 +1,9 @@
 [submodule "plugins/stonesense"]
 	path = plugins/stonesense
-	url = git://github.com/DFHack/stonesense.git
+	url = git://github.com/JapaMala/stonesense.git
 [submodule "plugins/isoworld"]
 	path = plugins/isoworld
-	url = git://github.com/DFHack/isoworld.git
+	url = git://github.com/JapaMala/isoworld.git
 [submodule "plugins/df2mc"]
 	path = plugins/df2mc
 	url = git://github.com/DFHack/DF2MC.git

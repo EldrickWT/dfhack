@@ -108,20 +108,20 @@ static void printTraits(color_ostream &con, df::unit* cre, ostream& out)
     df::unit_soul * s = cre->status.current_soul;
     if (s)
     {
-        FOR_ENUM_ITEMS(personality_facet_type,index)
-        {
-            out << "      <Trait name='" << ENUM_KEY_STR(personality_facet_type, index) <<
-                "' value='" << s->traits[index] << "'>";
-            //FIXME: needs reimplementing trait string generation
-            /*
-            string trait = con->vinfo->getTrait(i, s->traits[i]);
-            if (!trait.empty()) {
-                out << trait.c_str();
-            }
-            */
-            out << "</Trait>" << endl;
-            
-        }
+        //FOR_ENUM_ITEMS(personality_facet_type,index)
+        //{
+        //    out << "      <Trait name='" << ENUM_KEY_STR(personality_facet_type, index) <<
+        //        "' value='" << s->traits[index] << "'>";
+        //    //FIXME: needs reimplementing trait string generation
+        //    /*
+        //    string trait = con->vinfo->getTrait(i, s->traits[i]);
+        //    if (!trait.empty()) {
+        //        out << trait.c_str();
+        //    }
+        //    */
+        //    out << "</Trait>" << endl;
+        //    
+        //}
     }
     out << "    </Traits>" << endl;
 }

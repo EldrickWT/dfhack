@@ -1,31 +1,37 @@
-# create first necessity items under cursor
+# create items under cursor
 
 category = $script_args[0] || 'help'
 mat_raw  = $script_args[1] || 'list'
 count    = $script_args[2]
 
 
-category = df.match_rawname(category, ['help', 'bars', 'boulders', 'plants', 'logs', 'webs', 'anvils']) || 'help'
+category = df.match_rawname(category, ['help', 'bars', 'boulders', 'plants', 'logs', 'webs', 'bags', 'cloth', 'meat', 'bins', 'barrels', 'boxes', 'blocks', 'anvils']) || 'help'
 
 if category == 'help'
 	puts <<EOS
-Create first necessity items under the cursor.
+Create items under the cursor.
 Usage:
  create-items [category] [raws token] [number]
 
 Item categories:
- bars, boulders, plants, logs, webs, anvils
+ bars, boulders, plants, logs, webs, bags, cloth, meat, bins, barrels, boxes, blocks, anvils
 
 Raw token:
  Either a full token (PLANT_MAT:ADLER:WOOD) or the middle part only
  (the missing part is autocompleted depending on the item category)
  Use 'list' to show all possibilities
 
-Exemples:
+Examples:
  create-items boulders hematite 30
  create-items bars CREATURE_MAT:CAT:SOAP 10
  create-items web cave_giant
  create-items plants list
+ create-items bags cave_giant 10 (list shows only silk)
+ create-items cloth cave_giant 10 (list shows only silk)
+ create-items meat demon_1 5
+ create-items bins oak 10 (list shows only wood)
+ create-items barrels highwood 10 (list shows only wood)
+ create-items boxes INORGANIC:STEEL 10 (list shows only wood)
 
 EOS
 	throw :script_finished
@@ -129,6 +135,82 @@ when 'webs'
 		item.dimension = 15000	# XXX may depend on creature (this is for GCS)
 	}
 
+when 'bags'
+	cls = DFHack::ItemBoxst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.creatures.all.find_all { |cre|
+			cre.material.find { |mat| mat.id == 'SILK' }
+		}.map { |cre| cre.creature_id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "CREATURE_MAT:#{mat_raw}:SILK"
+		puts mat_raw
+	end
+
+when 'cloth'
+	cls = DFHack::ItemClothst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.creatures.all.find_all { |cre|
+			cre.material.find { |mat| mat.id == 'SILK' }
+		}.map { |cre| cre.creature_id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "CREATURE_MAT:#{mat_raw}:SILK"
+		puts mat_raw
+	end
+
+when 'meat'
+	cls = DFHack::ItemMeatst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.creatures.all.find_all { |cre|
+			cre.material.find { |mat| mat.id == 'MUSCLE' }
+		}.map { |cre| cre.creature_id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "CREATURE_MAT:#{mat_raw}:MUSCLE"
+		puts mat_raw
+	end
+
+when 'bins'
+	cls = DFHack::ItemBinst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.plants.all.find_all { |plt|
+			plt.material.find { |mat| mat.id == 'WOOD' }
+		}.map { |plt| plt.id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "PLANT_MAT:#{mat_raw}:WOOD"
+		puts mat_raw
+	end
+
+when 'barrels'
+	cls = DFHack::ItemBarrelst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.plants.all.find_all { |plt|
+			plt.material.find { |mat| mat.id == 'WOOD' }
+		}.map { |plt| plt.id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "PLANT_MAT:#{mat_raw}:WOOD"
+		puts mat_raw
+	end
+
+when 'boxes'
+	cls = DFHack::ItemBoxst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.plants.all.find_all { |plt|
+			plt.material.find { |mat| mat.id == 'WOOD' }
+		}.map { |plt| plt.id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "PLANT_MAT:#{mat_raw}:WOOD"
+		puts mat_raw
+	end
+
+when 'blocks'
+	cls = DFHack::ItemBlocksst
+	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)
+		list = df.world.raws.inorganics.find_all { |ino|
+			ino.material.flags[:IS_STONE]
+		}.map { |ino| ino.id }
+		mat_raw = match_list(mat_raw, list)
+		mat_raw = "INORGANIC:#{mat_raw}"
+		puts mat_raw
+	end
 when 'anvils'
 	cls = DFHack::ItemAnvilst
 	if mat_raw !~ /:/ and !(df.decode_mat(mat_raw) rescue nil)

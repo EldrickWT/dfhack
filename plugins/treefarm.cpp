@@ -110,9 +110,9 @@ void checkFarms(color_ostream& out, void* ptr) {
                     df::tiletype_shape shape = ENUM_ATTR(tiletype, shape, type);
                     if ( !block->designation[x][y].bits.hidden &&
                          shape != df::enums::tiletype_shape::WALL &&
-                         shape != df::enums::tiletype_shape::TREE )
+                         shape != df::enums::tiletype_shape::TRUNK_BRANCH )
                         continue;
-                    if ( shape != df::enums::tiletype_shape::TREE ) {
+                    if ( shape != df::enums::tiletype_shape::TRUNK_BRANCH ) {
                         if ( x == 0 && (block->map_pos.x/16) == 0 )
                             continue;
                         if ( y == 0 && (block->map_pos.y/16) == 0 )

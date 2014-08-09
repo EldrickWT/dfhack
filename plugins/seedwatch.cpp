@@ -275,7 +275,7 @@ DFhackCExport command_result plugin_init(color_ostream &out, vector<PluginComman
     abbreviations["sb"] = "BERRY_SUN";
     abbreviations["sp"] = "POD_SWEET";
     abbreviations["vh"] = "HERB_VALLEY";
-    abbreviations["ws"] = "BERRIES_STRAW_WILD";
+    abbreviations["ws"] = "BERRIES_STRAW";
     abbreviations["wv"] = "VINE_WHIP";
     return CR_OK;
 }

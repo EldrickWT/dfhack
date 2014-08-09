@@ -54,6 +54,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include <md5wrapper.h>
+#include "Pragma.h"
 
 using std::cout;
 using std::cerr;
