@@ -38,4 +38,8 @@ ENDIF(UNIX)
 # this makes sure all the stuff is put in proper places and linked to dfhack
 DFHACK_PLUGIN(rendermax ${PROJECT_SRCS} LINK_LIBRARIES ${PROJECT_LIBS})
 install(FILES rendermax.lua
+<<<<<<< HEAD
         DESTINATION ${DFHACK_DATA_DESTINATION}/raw)
+=======
+        DESTINATION ${DFHACK_BINARY_DESTINATION})
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9

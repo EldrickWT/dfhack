@@ -14,7 +14,10 @@
 #include "df/texture_handler.h"
 #include "df/graphic.h"
 #include <math.h>
+<<<<<<< HEAD
 #include <cmath>
+=======
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 
 using df::renderer;
 using df::init;
@@ -95,12 +98,18 @@ public:
     virtual void set_fullscreen() { 
         copy_to_inner();
         parent->set_fullscreen();
+<<<<<<< HEAD
         copy_from_inner();
+=======
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     };
     virtual void zoom(df::zoom_commands z) { 
         copy_to_inner();
         parent->zoom(z);
+<<<<<<< HEAD
         copy_from_inner();
+=======
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     };
     virtual void resize(int32_t w, int32_t h) { 
         copy_to_inner();
@@ -188,6 +197,7 @@ public:
     };
 };
 
+<<<<<<< HEAD
 struct rgbf
 {
     float r,g,b;
@@ -216,26 +226,65 @@ struct rgbf
         return rgbf(r*cell.r,g*cell.g,b*cell.b);
     }
     rgbf operator*=(float val)
+=======
+struct lightCell
+{
+    float r,g,b;
+    lightCell():r(0),g(0),b(0)
+    {
+        
+    }
+    lightCell(float r,float g,float b):r(r),g(g),b(b)
+    {
+
+    }
+    lightCell operator-(const lightCell& cell) const
+    {
+        return lightCell(r-cell.r,g-cell.g,b-cell.b);
+    }
+    lightCell operator*(float val)const
+    {
+        return lightCell(r*val,g*val,b*val);
+    }
+    lightCell operator/(float val) const
+    {
+        return lightCell(r/val,g/val,b/val);
+    }
+    lightCell operator*(const lightCell& cell) const
+    {
+        return lightCell(r*cell.r,g*cell.g,b*cell.b);
+    }
+    lightCell operator*=(float val)
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     {
         r*=val;
         g*=val;
         b*=val;
         return *this;
     }
+<<<<<<< HEAD
     rgbf operator*=(const rgbf& cell)
+=======
+    lightCell operator*=(const lightCell& cell)
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     {
         r*=cell.r;
         g*=cell.g;
         b*=cell.b;
         return *this;
     }
+<<<<<<< HEAD
     rgbf operator+=(const rgbf& cell)
+=======
+    lightCell operator+=(const lightCell& cell)
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     {
         r+=cell.r;
         g+=cell.g;
         b+=cell.b;
         return *this;
     }
+<<<<<<< HEAD
     rgbf operator+(const rgbf& other) const
     {
         return rgbf(r+other.r,g+other.g,b+other.b);
@@ -255,6 +304,27 @@ struct rgbf
     rgbf pow(const int exp) const
     {
         return rgbf(std::pow(r, exp), std::pow(g, exp), std::pow(b, exp));
+=======
+    lightCell operator+(const lightCell& other) const
+    {
+        return lightCell(r+other.r,g+other.g,b+other.b);
+    }
+    bool operator<=(const lightCell& other) const
+    {
+        return r<=other.r && g<=other.g && b<=other.b;
+    }
+    float dot(const lightCell& other) const
+    {
+        return r*other.r+g*other.g+b*other.b;
+    }
+    lightCell pow(const float exp) const
+    {
+        return lightCell(std::pow(r, exp), std::pow(g, exp), std::pow(b, exp));
+    }
+    lightCell pow(const int exp) const
+    {
+        return lightCell(std::pow(r, exp), std::pow(g, exp), std::pow(b, exp));
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     }
 };
 struct renderer_test : public renderer_wrap {
@@ -266,7 +336,11 @@ private:
         float *fg = p->fg + tile * 4 * 6;
         float *bg = p->bg + tile * 4 * 6;
         float *tex = p->tex + tile * 2 * 6;
+<<<<<<< HEAD
         rgbf light=lightGrid[tile];
+=======
+        lightCell light=lightGrid[tile];
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
         for (int i = 0; i < 6; i++) {
             *(fg++) *= light.r;
             *(fg++) *= light.g;
@@ -290,7 +364,11 @@ private:
     }
 public:
     tthread::fast_mutex dataMutex;
+<<<<<<< HEAD
     std::vector<rgbf> lightGrid;
+=======
+    std::vector<lightCell> lightGrid;
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     renderer_test(renderer* parent):renderer_wrap(parent)
     {
         reinitLightGrid();
@@ -312,6 +390,7 @@ public:
         //and then map read
         //same stuff for all of them i guess...
     };
+<<<<<<< HEAD
     virtual void set_fullscreen()
     {
         renderer_wrap::set_fullscreen();
@@ -322,6 +401,8 @@ public:
         renderer_wrap::zoom(z);
         reinitLightGrid();
     }
+=======
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     virtual void grid_resize(int32_t w, int32_t h) { 
         renderer_wrap::grid_resize(w,h);
         reinitLightGrid(w,h);
@@ -345,11 +426,19 @@ private:
         float *fg = p->fg + tile * 4 * 6;
         float *bg = p->bg + tile * 4 * 6;
         float *tex = p->tex + tile * 2 * 6;
+<<<<<<< HEAD
         rgbf fm=foreMult[tile];
         rgbf fo=foreOffset[tile];
 
         rgbf bm=backMult[tile];
         rgbf bo=backOffset[tile];
+=======
+        lightCell fm=foreMult[tile];
+        lightCell fo=foreOffset[tile];
+
+        lightCell bm=backMult[tile];
+        lightCell bo=backOffset[tile];
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
         for (int i = 0; i < 6; i++) {
             rgba* fore=reinterpret_cast<rgba*>(fg);
             fore->r=fore->r*fm.r+fo.r;
@@ -378,8 +467,13 @@ private:
     }
 public:
     tthread::fast_mutex dataMutex;
+<<<<<<< HEAD
     std::vector<rgbf> foreOffset,foreMult;
     std::vector<rgbf> backOffset,backMult;
+=======
+    std::vector<lightCell> foreOffset,foreMult;
+    std::vector<lightCell> backOffset,backMult;
+>>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     inline int xyToTile(int x, int y)
     {
        return x*(df::global::gps->dimy) + y;
