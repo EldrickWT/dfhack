@@ -2,7 +2,6 @@
 #define RENDERER_LIGHT_INCLUDED
 #include "renderer_opengl.hpp"
 #include "Types.h"
-<<<<<<< HEAD
 #include <tuple>
 #include <stack>
 #include <memory>
@@ -69,14 +68,6 @@ private:
         //if light_adaptation/intensity!=0 then draw 
 
     }
-=======
-#include <map>
-#include <tuple>
-#include "modules/MapCache.h"
-
-struct renderer_light : public renderer_wrap {
-private:
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     void colorizeTile(int x,int y)
     {
         const int tile = x*(df::global::gps->dimy) + y;
@@ -84,14 +75,9 @@ private:
         float *fg = p->fg + tile * 4 * 6;
         float *bg = p->bg + tile * 4 * 6;
         float *tex = p->tex + tile * 2 * 6;
-<<<<<<< HEAD
         rgbf light=lightGrid[tile];//for light adaptation: rgbf light=adapt_to_light(lightGrid[tile]);
 
         for (int i = 0; i < 6; i++) { //oh how sse would do wonders here, or shaders...
-=======
-        lightCell light=lightGrid[tile];
-        for (int i = 0; i < 6; i++) {
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
             *(fg++) *= light.r;
             *(fg++) *= light.g;
             *(fg++) *= light.b;
@@ -106,28 +92,17 @@ private:
     void reinitLightGrid(int w,int h)
     {
         tthread::lock_guard<tthread::fast_mutex> guard(dataMutex);
-<<<<<<< HEAD
         lightGrid.resize(w*h,rgbf(1,1,1));
-=======
-        lightGrid.resize(w*h);
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     }
     void reinitLightGrid()
     {
         reinitLightGrid(df::global::gps->dimy,df::global::gps->dimx);
     }
-<<<<<<< HEAD
     
 public:
     tthread::fast_mutex dataMutex;
     std::vector<rgbf> lightGrid;
     renderer_light(renderer* parent):renderer_wrap(parent),light_adaptation(1)
-=======
-public:
-    tthread::fast_mutex dataMutex;
-    std::vector<lightCell> lightGrid;
-    renderer_light(renderer* parent):renderer_wrap(parent)
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     {
         reinitLightGrid();
     }
@@ -151,7 +126,6 @@ public:
         renderer_wrap::resize(w,h);
         reinitLightGrid();
     }
-<<<<<<< HEAD
     virtual void set_fullscreen()
     {
         renderer_wrap::set_fullscreen();
@@ -162,26 +136,17 @@ public:
         renderer_wrap::zoom(z);
         reinitLightGrid();
     }
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 };
 class lightingEngine
 {
 public:
     lightingEngine(renderer_light* target):myRenderer(target){}
-<<<<<<< HEAD
     virtual ~lightingEngine(){}
-=======
-
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     virtual void reinit()=0;
     virtual void calculate()=0;
 
     virtual void updateWindow()=0;
-<<<<<<< HEAD
     virtual void preRender()=0;
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 
     virtual void loadSettings()=0;
     virtual void clear()=0;
@@ -193,22 +158,14 @@ protected:
 };
 struct lightSource
 {
-<<<<<<< HEAD
     rgbf power;
-=======
-    lightCell power;
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     int radius;
     bool flicker;
     lightSource():power(0,0,0),radius(0),flicker(false)
     {
 
     }
-<<<<<<< HEAD
     lightSource(rgbf power,int radius);
-=======
-    lightSource(lightCell power,int radius);
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     float powerSquared()const
     {
         return power.r*power.r+power.g*power.g+power.b*power.b;
@@ -219,7 +176,6 @@ struct lightSource
 struct matLightDef
 {
     bool isTransparent;
-<<<<<<< HEAD
     rgbf transparency;
     bool isEmiting;
     bool flicker;
@@ -230,18 +186,6 @@ struct matLightDef
         transparency(transparency),emitColor(emit),radius(rad){}
     matLightDef(rgbf emit,int rad):isTransparent(false),isEmiting(true),emitColor(emit),radius(rad),transparency(0,0,0){}
     matLightDef(rgbf transparency):isTransparent(true),isEmiting(false),transparency(transparency){}
-=======
-    lightCell transparency;
-    bool isEmiting;
-    bool flicker;
-    lightCell emitColor;
-    int radius;
-    matLightDef():isTransparent(false),isEmiting(false),transparency(0,0,0),emitColor(0,0,0),radius(0){}
-    matLightDef(lightCell transparency,lightCell emit,int rad):isTransparent(true),isEmiting(true),
-        transparency(transparency),emitColor(emit),radius(rad){}
-    matLightDef(lightCell emit,int rad):isTransparent(false),isEmiting(true),emitColor(emit),radius(rad),transparency(0,0,0){}
-    matLightDef(lightCell transparency):isTransparent(true),isEmiting(false),transparency(transparency){}
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     lightSource makeSource(float size=1) const
     {
         if(size>0.999 && size<1.001)
@@ -259,7 +203,6 @@ struct buildingLightDef
     float size;
     buildingLightDef():poweredOnly(false),useMaterial(true),thickness(1.0f),size(1.0f){}
 };
-<<<<<<< HEAD
 struct itemLightDef
 {
     matLightDef light;   
@@ -329,8 +272,6 @@ private:
     void doRay(const rgbf& power,int cx,int cy,int tx,int ty,int num_diffuse);
     rgbf lightUpCell(rgbf power,int dx,int dy,int tx,int ty);
 };
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 class lightingEngineViewscreen:public lightingEngine
 {
 public:
@@ -340,17 +281,12 @@ public:
     void calculate();
 
     void updateWindow();
-<<<<<<< HEAD
     void preRender();
-=======
-
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     void loadSettings();
     void clear();
 
     void debug(bool enable){doDebug=enable;};
 private:
-<<<<<<< HEAD
     void fixAdvMode(int mode);
     df::coord2d worldToViewportCoord(const df::coord2d& in,const DFHack::rect2d& r,const df::coord2d& window2d) ;
     
@@ -370,25 +306,6 @@ private:
     creatureLightDef* getCreatureDef(df::unit* u);
     itemLightDef* getItemDef(df::item* it);
 
-=======
-
-    df::coord2d worldToViewportCoord(const df::coord2d& in,const DFHack::rect2d& r,const df::coord2d& window2d) ;
-    bool isInViewport(const df::coord2d& in,const DFHack::rect2d& r);
-
-    void doSun(const lightSource& sky,MapExtras::MapCache& map);
-    void doOcupancyAndLights();
-    lightCell propogateSun(MapExtras::Block* b, int x,int y,const lightCell& in,bool lastLevel);
-    void doRay(std::vector<lightCell> & target, lightCell power,int cx,int cy,int tx,int ty);
-    void doFovs();
-	void doLight(std::vector<lightCell> & target, int index);
-    lightCell lightUpCell(std::vector<lightCell> & target, lightCell power,int dx,int dy,int tx,int ty);
-    bool addLight(int tileId,const lightSource& light);
-    void addOclusion(int tileId,const lightCell& c,float thickness);
-
-    matLightDef* getMaterial(int matType,int matIndex);
-    buildingLightDef* getBuilding(df::building* bld);
-    
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     //apply material to cell
     void applyMaterial(int tileId,const matLightDef& mat,float size=1, float thickness = 1);
     //try to find and apply material, if failed return false, and if def!=null then apply def.
@@ -403,7 +320,6 @@ private:
         return df::coord2d(index/h, index%h);
     }
     //maps
-<<<<<<< HEAD
     std::vector<rgbf> lightMap;
     std::vector<rgbf> ocupancy;
     std::vector<lightSource> lights;
@@ -420,45 +336,20 @@ public:
 	void lightWorkerThread(void * arg);
 private:
     rgbf getSkyColor(float v);
-=======
-    std::vector<lightCell> lightMap;
-    std::vector<lightCell> ocupancy;
-    std::vector<lightSource> lights;
-
-    //Threading stuff
-    tthread::mutex indexMutex;
-    tthread::mutex writeMutex;
-    int nextIndex;
-    std::vector<tthread::thread *> threadList;
-    void doLightThreads();
-    //misc
-    void setHour(float h){dayHour=h;};
-public:
-	void lightWorkerThread(void * arg);
-private:
-    lightCell getSkyColor(float v);
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     bool doDebug;
 
     //settings
     float daySpeed;
     float dayHour; //<0 to cycle
-<<<<<<< HEAD
     std::vector<rgbf> dayColors; // a gradient of colors, first to 0, last to 24
-=======
-    std::vector<lightCell> dayColors; // a gradient of colors, first to 0, last to 24
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     ///set up sane settings if setting file does not exist.
     void defaultSettings(); 
 
     static int parseMaterials(lua_State* L);
     static int parseSpecial(lua_State* L);
     static int parseBuildings(lua_State* L);
-<<<<<<< HEAD
     static int parseItems(lua_State* L);
     static int parseCreatures(lua_State* L);
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
     //special stuff
     matLightDef matLava;
     matLightDef matIce;
@@ -468,7 +359,6 @@ private:
     matLightDef matWater;
     matLightDef matCitizen;
     float levelDim;
-<<<<<<< HEAD
     int adv_mode;
     //materials
     std::unordered_map<std::pair<int,int>,matLightDef> matDefs;
@@ -484,15 +374,4 @@ private:
 };
 rgbf blend(const rgbf& a,const rgbf& b);
 rgbf blendMax(const rgbf& a,const rgbf& b);
-=======
-    //materials
-    std::map<std::pair<int,int>,matLightDef> matDefs;
-    //buildings
-    std::map<std::tuple<int,int,int>,buildingLightDef> buildingDefs;
-    int w,h;
-    DFHack::rect2d mapPort;
-};
-lightCell blend(lightCell a,lightCell b);
-lightCell blendMax(lightCell a,lightCell b);
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 #endif

@@ -4,11 +4,8 @@ ret=ret[1]
 ret.materials={}
 ret.buildings={}
 ret.special={}
-<<<<<<< HEAD
 ret.items={}
 ret.creatures={}
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 for k,v in pairs(ret) do
   _ENV[k]=v
 end
@@ -33,11 +30,7 @@ end
 function buildingLookUp(id)
 	local tokens={}
 	local lookup={ Workshop=df.workshop_type,Furnace=df.furnace_type,Trap=df.trap_type,
-<<<<<<< HEAD
 		SiegeEngine=df.siegeengine_type}
-=======
-		SiegeEngine=siegeengine_type}
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 	for i in string.gmatch(id, "[^:]+") do
 		table.insert(tokens,i)
 	end
@@ -53,18 +46,13 @@ function buildingLookUp(id)
 				for k,v in pairs(df.global.world.raws.buildings.workshops) do
 					if v.code==tokens[3] then
 						ret.custom=v.id
-<<<<<<< HEAD
 						return ret
-=======
-						break
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 					end
 				end
 			elseif ret.type==df.building_type.Furnace then
 				for k,v in pairs(df.global.world.raws.buildings.furnaces) do
 					if v.code==tokens[3] then
 						ret.custom=v.id
-<<<<<<< HEAD
 						return ret
 					end
 				end
@@ -137,15 +125,6 @@ function addItem(id,transparency,emitance,radius,flags)
 	local itemId=itemLookup(id)
 	local mat=makeMaterialDef(transparency,emitance,radius,flags)
 	table.insert(items,{["type"]=itemId.type,subtype=itemId.subtype,light=mat})
-=======
-						break
-					end
-				end
-			end
-		end
-	end
-	return ret
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 end
 -- add building by id (string e.g. "Statue" or "Workshop:Masons", flags is a table of strings
 -- supported flags:
@@ -210,12 +189,9 @@ special.dayColors={ {0,0,0}, --dark at 0 hours
 					{0.5,0.5,0.5}, 
 					{0,0,0}} --dark at 24 hours 
 special.daySpeed=1 -- 1->1200 cur_year_ticks per day. 2->600 ticks
-<<<<<<< HEAD
 special.diffusionCount=1 -- split beam max 1 times to mimic diffuse lights
 special.advMode=0 -- 1 or 0 different modes for adv mode. 0-> use df vision system, 
 				  -- 1(does not work)->everything visible, let rendermax light do the work
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
 --TODO dragonfire
 --materials
 
@@ -241,12 +217,9 @@ addBuilding("WindowGlass",nil,nil,0,{"useMaterial"})
 addBuilding("WindowGem",nil,nil,0,{"useMaterial"})
 addBuilding("Door",nil,nil,0,{"useMaterial"}) -- special case, only closed door obstruct/emit light
 addBuilding("Floodgate",nil,nil,0,{"useMaterial"}) -- special case, only closed door obstruct/emit light
-<<<<<<< HEAD
 --creatures
 addCreature("ELEMENTMAN_MAGMA",{0.8,0.2,0.2},{0.8,0.2,0.2},5)
 --items
 addItem("GEM",nil,nil,{"useMaterial","onGround"})
 addItem("ROUGH",nil,nil,{"useMaterial","onGround"})
 addItem("SMALLGEM",nil,nil,{"useMaterial","onGround"})
-=======
->>>>>>> 2779290b70feebb0fab5bd7225a18604efaf5cc9
