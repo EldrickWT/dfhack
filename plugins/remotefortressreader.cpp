@@ -56,6 +56,8 @@ using namespace df::enums;
 using namespace RemoteFortressReader;
 using namespace std;
 
+using df::global::world;
+
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
 
@@ -75,7 +77,7 @@ void FindChangedBlocks();
 DFHACK_PLUGIN("RemoteFortressReader");
 
 // Mandatory init function. If you have some global state, create it here.
-DFhackCExport command_result plugin_init(color_ostream &out, std::vector <PluginCommand> &commands)
+DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
     //// Fill the command list with your commands.
     //commands.push_back(PluginCommand(
@@ -103,7 +105,7 @@ DFhackCExport RPCService *plugin_rpcconnect(color_ostream &)
 }
 
 // This is called right before the plugin library is removed from memory.
-DFhackCExport command_result plugin_shutdown(color_ostream &out)
+DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 {
     // You *MUST* kill all threads you created before this returns.
     // If everything fails, just return CR_FAILURE. Your plugin will be
@@ -377,9 +379,9 @@ RemoteFortressReader::TiletypeVariant TranslateVariant(df::tiletype_variant vari
 static command_result CheckHashes(color_ostream &stream, const EmptyMessage *in)
 {
     clock_t start = clock();
-    for (int i = 0; i < df::global::world->map.map_blocks.size(); i++)
+    for (int i = 0; i < world->map.map_blocks.size(); i++)
     {
-        df::map_block * block = df::global::world->map.map_blocks[i];
+        df::map_block * block = world->map.map_blocks[i];
         fletcher16((uint8_t*)(block->tiletype), 16 * 16 * sizeof(df::enums::tiletype::tiletype));
     }
     clock_t end = clock();
@@ -407,22 +409,22 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
 
 
 
-    df::world_raws *raws = &df::global::world->raws;
+    df::world_raws *raws = &world->raws;
     MaterialInfo mat;
     for (int i = 0; i < raws->inorganics.size(); i++)
     {
         mat.decode(0, i);
         MaterialDefinition *mat_def = out->add_material_list();
-        mat_def->mutable_mat_pair()->set_mat_type(0);
-        mat_def->mutable_mat_pair()->set_mat_index(i);
+        mat_def->mutable_mat_pair()->set_mat_index(0);
+        mat_def->mutable_mat_pair()->set_mat_type(i);
         mat_def->set_id(mat.getToken());
         mat_def->set_name(mat.toString()); //find the name at cave temperature;
         if (raws->inorganics[i]->material.state_color[GetState(&raws->inorganics[i]->material)] < raws->language.colors.size())
         {
             df::descriptor_color *color = raws->language.colors[raws->inorganics[i]->material.state_color[GetState(&raws->inorganics[i]->material)]];
-            mat_def->mutable_state_color()->set_red(color->red * 255);
-            mat_def->mutable_state_color()->set_green(color->green * 255);
-            mat_def->mutable_state_color()->set_blue(color->blue * 255);
+            mat_def->mutable_state_color()->set_red(color->red);
+            mat_def->mutable_state_color()->set_green(color->green);
+            mat_def->mutable_state_color()->set_blue(color->blue);
         }
     }
     for (int i = 1; i < 19; i++)
@@ -434,16 +436,16 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
         {
             mat.decode(i, j);
             MaterialDefinition *mat_def = out->add_material_list();
-            mat_def->mutable_mat_pair()->set_mat_type(i);
-            mat_def->mutable_mat_pair()->set_mat_index(j);
+            mat_def->mutable_mat_pair()->set_mat_index(i);
+            mat_def->mutable_mat_pair()->set_mat_type(j);
             mat_def->set_id(mat.getToken());
             mat_def->set_name(mat.toString()); //find the name at cave temperature;
             if (raws->mat_table.builtin[i]->state_color[GetState(raws->mat_table.builtin[i])] < raws->language.colors.size())
             {
                 df::descriptor_color *color = raws->language.colors[raws->mat_table.builtin[i]->state_color[GetState(raws->mat_table.builtin[i])]];
-                mat_def->mutable_state_color()->set_red(color->red * 255);
-                mat_def->mutable_state_color()->set_green(color->green * 255);
-                mat_def->mutable_state_color()->set_blue(color->blue * 255);
+                mat_def->mutable_state_color()->set_red(color->red);
+                mat_def->mutable_state_color()->set_green(color->green);
+                mat_def->mutable_state_color()->set_blue(color->blue);
             }
         }
     }
@@ -454,16 +456,16 @@ static command_result GetMaterialList(color_ostream &stream, const EmptyMessage 
         {
             mat.decode(j + 19, i);
             MaterialDefinition *mat_def = out->add_material_list();
-            mat_def->mutable_mat_pair()->set_mat_type(j + 19);
-            mat_def->mutable_mat_pair()->set_mat_index(i);
+            mat_def->mutable_mat_pair()->set_mat_index(j+19);
+            mat_def->mutable_mat_pair()->set_mat_type(i);
             mat_def->set_id(mat.getToken());
             mat_def->set_name(mat.toString()); //find the name at cave temperature;
             if (creature->material[j]->state_color[GetState(creature->material[j])] < raws->language.colors.size())
             {
                 df::descriptor_color *color = raws->language.colors[creature->material[j]->state_color[GetState(creature->material[j])]];
-                mat_def->mutable_state_color()->set_red(color->red * 255);
-                mat_def->mutable_state_color()->set_green(color->green * 255);
-                mat_def->mutable_state_color()->set_blue(color->blue * 255);
+                mat_def->mutable_state_color()->set_red(color->red);
+                mat_def->mutable_state_color()->set_green(color->green);
+                mat_def->mutable_state_color()->set_blue(color->blue);
             }
         }
     }
