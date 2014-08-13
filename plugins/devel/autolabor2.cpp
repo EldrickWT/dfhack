@@ -412,7 +412,7 @@ static const struct labor_default default_labor_infos[] = {
     /* HAUL_REFUSE */           {100, 0, TOOL_NONE},
     /* HAUL_ITEM */             {100, 0, TOOL_NONE},
     /* HAUL_FURNITURE */        {100, 0, TOOL_NONE},
-    /* HAUL_ANIMAL */           {100, 0, TOOL_NONE},
+    /* HAUL_ANIMALS */           {100, 0, TOOL_NONE},
     /* CLEAN */                 {200, 0, TOOL_NONE},
     /* CUTWOOD */               {200, 0, TOOL_AXE},
     /* CARPENTER */             {200, 0, TOOL_NONE},
@@ -545,10 +545,10 @@ static df::unit_labor hauling_labor_map[] =
     df::unit_labor::HAUL_ITEM,	/* INSTRUMENT */
     df::unit_labor::HAUL_ITEM,	/* TOY */
     df::unit_labor::HAUL_FURNITURE,	/* WINDOW */
-    df::unit_labor::HAUL_ANIMAL,	/* CAGE */
+    df::unit_labor::HAUL_ANIMALS,	/* CAGE */
     df::unit_labor::HAUL_ITEM,	/* BARREL */
     df::unit_labor::HAUL_ITEM,	/* BUCKET */
-    df::unit_labor::HAUL_ANIMAL,	/* ANIMALTRAP */
+    df::unit_labor::HAUL_ANIMALS,	/* ANIMALTRAP */
     df::unit_labor::HAUL_FURNITURE,	/* TABLE */
     df::unit_labor::HAUL_FURNITURE,	/* COFFIN */
     df::unit_labor::HAUL_FURNITURE,	/* STATUE */
@@ -2095,7 +2095,7 @@ public:
         labor_needed[df::unit_labor::HAUL_FOOD]      += world->stockpile.num_jobs[6];
         labor_needed[df::unit_labor::HAUL_REFUSE]    += world->stockpile.num_jobs[7];
         labor_needed[df::unit_labor::HAUL_FURNITURE] += world->stockpile.num_jobs[8];
-        labor_needed[df::unit_labor::HAUL_ANIMAL]    += world->stockpile.num_jobs[9];
+        labor_needed[df::unit_labor::HAUL_ANIMALS]    += world->stockpile.num_jobs[9];
 
         // add entries for vehicle hauling
 
@@ -2125,7 +2125,7 @@ public:
         {
             if (l == df::unit_labor::NONE)
                 continue;
-            if (l >= df::unit_labor::HAUL_STONE && l <= df::unit_labor::HAUL_ANIMAL)
+            if (l >= df::unit_labor::HAUL_STONE && l <= df::unit_labor::HAUL_ANIMALS)
                 continue;
             if (labor_infos[l].idle_dwarfs > 0 && labor_needed[l] > labor_infos[l].busy_dwarfs)
             {
@@ -2201,7 +2201,7 @@ public:
             (1 << df::unit_labor::HAUL_REFUSE) |
             (1 << df::unit_labor::HAUL_ITEM) |
             (1 << df::unit_labor::HAUL_FURNITURE) |
-            (1 << df::unit_labor::HAUL_ANIMAL);
+            (1 << df::unit_labor::HAUL_ANIMALS);
 
         while (!available_dwarfs.empty())
         {
@@ -2278,7 +2278,7 @@ public:
                     (*bestdwarf)->clear_labor(l);
             }
 
-            if (best_labor >= df::unit_labor::HAUL_STONE && best_labor <= df::unit_labor::HAUL_ANIMAL)
+            if (best_labor >= df::unit_labor::HAUL_STONE && best_labor <= df::unit_labor::HAUL_ANIMALS)
                 canary &= ~(1 << best_labor);
 
             if (best_labor != df::unit_labor::NONE)
@@ -2295,7 +2295,7 @@ public:
             dwarf_info_t* d = dwarf_info.front();
             FOR_ENUM_ITEMS (unit_labor, l)
             {
-                if (l >= df::unit_labor::HAUL_STONE && l <= df::unit_labor::HAUL_ANIMAL &&
+                if (l >= df::unit_labor::HAUL_STONE && l <= df::unit_labor::HAUL_ANIMALS &&
                     canary & (1 << l))
                     d->set_labor(l);
             }
