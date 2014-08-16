@@ -477,7 +477,11 @@ static const struct labor_default default_labor_infos[] = {
     /* PRESSING */              {200, 0, TOOL_NONE},
     /* BEEKEEPING */            {200, 0, TOOL_NONE},
     /* WAX_WORKING */           {200, 0, TOOL_NONE},
-    /* PUSH_HAUL_VEHICLES */    {200, 0, TOOL_NONE}
+    /* HANDLE_VEHICLES */       {200, 0, TOOL_NONE},
+    /* HAUL_TRADE */            {200, 0, TOOL_NONE},
+    /* PULL_LEVER */            {200, 0, TOOL_NONE},
+    /* REMOVE_CONSTRUCTION */   {200, 0, TOOL_NONE},
+    /* HAUL_WATER */            {200, 0, TOOL_NONE}
 };
 
 struct dwarf_info_t

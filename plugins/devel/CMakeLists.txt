@@ -36,6 +36,3 @@ DFHACK_PLUGIN(moveinmass moveinmass.cpp)
 DFHACK_PLUGIN(wagonshot wagonshot.cpp)
 DFHACK_PLUGIN(wagonshotarray wagonshotarray.cpp)
 DFHACK_PLUGIN(wagonsniper wagonsniper.cpp)
-
-#Temporary
-DFHACK_PLUGIN(fastdwarf2 fastdwarf2.cpp)
