@@ -16,7 +16,7 @@ else
         dfhack.timeout(150,'ticks',callback) --disables if map/world is unloaded automatically
       end
     end
-    if df.global.ui.main.fortress_entity ~= nil then -- added this check, now only attempts write in fort mode
+            if df.world_site.find(df.global.ui.site_id) ~= nil then -- added this check, now only attempts write in fort mode
                 local site = df.world_site.find(df.global.ui.site_id)
                 --local fort_ent = df.global.ui.main.fortress_entity
                 --local civ_ent = df.historical_entity.find(df.global.ui.civ_id)

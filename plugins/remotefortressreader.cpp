@@ -56,8 +56,6 @@ using namespace df::enums;
 using namespace RemoteFortressReader;
 using namespace std;
 
-using df::global::world;
-
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
 
