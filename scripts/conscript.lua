@@ -2,12 +2,14 @@
 --I know it doesn't look it but I am trying to not just tabulate every single creature in the objects directory. Really I swear.
 debug = false
 for _,arg in ipairs({...}) do
-	if string.lower(arg) == "debug" then debug = true	end
-	if string.lower(arg) == "mine" then mine = true	end
-	if string.lower(arg) == "fish" then fish = true	end
-	if string.lower(arg) == "hunt" then hunt = true	end
-	if string.lower(arg) == "wood" then wood = true	end
-	if string.lower(arg) == "bees" then bees = true	end
+    if string.lower(arg) == "debug" then debug = true end
+
+    if string.lower(arg) == "mine" then mine = true end
+    if string.lower(arg) == "fish" then fish = true end
+    if string.lower(arg) == "hunt" then hunt = true end
+    if string.lower(arg) == "wood" then wood = true end
+    if string.lower(arg) == "bees" then bees = true end
+
 end
 for _,v in ipairs(df.global.world.units.active) do
     if not (v.flags1.dead == true) then
@@ -36,7 +38,7 @@ for _,v in ipairs(df.global.world.units.active) do
             else
                 namey2 = 'named ' ..dfhack.TranslateName(v.name,true)
             end
-            -- We don't check for POWER, should we? We also don't get nitty and gritty about the entity races.
+            -- We don't check for POWER, should we? We also don't get too nitty and gritty about the entity races.
             -- Training_level 9 is -SOME KIND OF NORMAL- when the tame flag is false. df.global.ui.civ_id members are typically level 9
             if (df.creature_raw.find(v.race).creature_id == "DOWNTRODDEN")
               or (df.creature_raw.find(v.race).creature_id == "FABULOUSA")
@@ -103,7 +105,7 @@ for _,v in ipairs(df.global.world.units.active) do
             if v.counters.soldier_mood==2 then
                 v.counters.soldier_mood_countdown=1
             end
-            if mine==true then v.status.labors.MINE = true end
+            if mine==true then v.status.labors.MINE = true unit.military.pickup_flags.bits.update = true else v.status.labors.MINE = false end
             v.status.labors.HAUL_STONE = true 
             v.status.labors.HAUL_WOOD = true 
             v.status.labors.HAUL_BODY = true 
@@ -113,7 +115,7 @@ for _,v in ipairs(df.global.world.units.active) do
             v.status.labors.HAUL_FURNITURE = true 
             v.status.labors.HAUL_ANIMALS = true 
             v.status.labors.CLEAN = true
-            if wood==true then v.status.labors.CUTWOOD = true end
+            if wood==true then v.status.labors.CUTWOOD = true unit.military.pickup_flags.bits.update = true else v.status.labors.CUTWOOD = false end
             v.status.labors.CARPENTER = true 
             v.status.labors.DETAIL = true 
             v.status.labors.MASON = true 
@@ -144,10 +146,10 @@ for _,v in ipairs(df.global.world.units.active) do
             v.status.labors.COOK = true 
             v.status.labors.PLANT = true 
             v.status.labors.HERBALIST = true 
-            if fish==true then v.status.labors.FISH = true end
+            if fish==true then v.status.labors.FISH = true else v.status.labors.FISH = false end
             v.status.labors.CLEAN_FISH = true 
             v.status.labors.DISSECT_FISH = true 
-            if hunt==true then v.status.labors.HUNT = true end
+            if hunt==true then v.status.labors.HUNT = true unit.military.pickup_flags.bits.update = true else v.status.labors.HUNT = false end
             v.status.labors.SMELT = true 
             v.status.labors.FORGE_WEAPON = true 
             v.status.labors.FORGE_ARMOR = true 
@@ -174,7 +176,7 @@ for _,v in ipairs(df.global.world.units.active) do
             v.status.labors.POTTERY = true 
             v.status.labors.GLAZING = true 
             v.status.labors.PRESSING = true 
-            if bees==true then v.status.labors.BEEKEEPING = true end 
+            if bees==true then v.status.labors.BEEKEEPING = true else v.status.labors.BEEKEEPING = false end 
             v.status.labors.WAX_WORKING = true 
             v.status.labors.HANDLE_VEHICLES = true 
             v.status.labors.HAUL_TRADE = true
