@@ -105,7 +105,7 @@ for _,v in ipairs(df.global.world.units.active) do
             if v.counters.soldier_mood==2 then
                 v.counters.soldier_mood_countdown=1
             end
-            if mine==true then v.status.labors.MINE = true unit.military.pickup_flags.bits.update = true else v.status.labors.MINE = false end
+            if mine==true then v.status.labors.MINE = true v.military.pickup_flags.update = true else v.status.labors.MINE = false end
             v.status.labors.HAUL_STONE = true 
             v.status.labors.HAUL_WOOD = true 
             v.status.labors.HAUL_BODY = true 
@@ -115,7 +115,7 @@ for _,v in ipairs(df.global.world.units.active) do
             v.status.labors.HAUL_FURNITURE = true 
             v.status.labors.HAUL_ANIMALS = true 
             v.status.labors.CLEAN = true
-            if wood==true then v.status.labors.CUTWOOD = true unit.military.pickup_flags.bits.update = true else v.status.labors.CUTWOOD = false end
+            if wood==true then v.status.labors.CUTWOOD = true v.military.pickup_flags.update = true else v.status.labors.CUTWOOD = false end
             v.status.labors.CARPENTER = true 
             v.status.labors.DETAIL = true 
             v.status.labors.MASON = true 
@@ -149,7 +149,7 @@ for _,v in ipairs(df.global.world.units.active) do
             if fish==true then v.status.labors.FISH = true else v.status.labors.FISH = false end
             v.status.labors.CLEAN_FISH = true 
             v.status.labors.DISSECT_FISH = true 
-            if hunt==true then v.status.labors.HUNT = true unit.military.pickup_flags.bits.update = true else v.status.labors.HUNT = false end
+            if hunt==true then v.status.labors.HUNT = true v.military.pickup_flags.update = true else v.status.labors.HUNT = false end
             v.status.labors.SMELT = true 
             v.status.labors.FORGE_WEAPON = true 
             v.status.labors.FORGE_ARMOR = true 
