@@ -7,6 +7,7 @@ local fish = false
 local hunt = false
 local wood = false
 local bees = false
+local help = false
 --Lazy Argument Checking... extra lines for readability
 for _,arg in ipairs({...}) do
     if string.lower(arg) == "debug" then debug = true end
