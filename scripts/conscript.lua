@@ -23,9 +23,72 @@ for _,arg in ipairs({...}) do
     if string.lower(arg) == "nowood" then wood = false end
     if string.lower(arg) == "nobees" then bees = false end
 
+    if string.lower(arg) == "help" then help = true end
+    if string.lower(arg) == "h" then help = true end
+    if string.lower(arg) == "?" then help = true end
+    if string.lower(arg) == "-help" then help = true end
+    if string.lower(arg) == "-h" then help = true end
+    if string.lower(arg) == "-?" then help = true end
+    if string.lower(arg) == "--help" then help = true end
+    if string.lower(arg) == "-h" then help = true end
+    if string.lower(arg) == "--?" then help = true end
 end
 --Lazy Help Section
---TODO
+if help==true then
+ print([[
+Conscript.lua is by EldrickWT - Github profile http://github.com/EldrickWT
+Bugs can be reported at - http://Github.com/EldrickWT/dfhack
+
+    Conscript is for converting Civilization Babies, and Children into Functional Adults
+first and foremost. It has no configuration in this regard.
+
+    Everyone able will be set to all the -safe to toggle on- labors. Nothing that
+directly precludes anything else. It also disables those labors that will interact with
+each other. These labors are:
+Mining
+Woodcutting
+Hunting
+
+    Each of these labors will turn the other labors off. While you could set all three on
+The behaviour is unwise. At the very least, which labor will take precident is a tad
+unpredictable. The unit might spam about having an axe instead of a mining pick, or
+a ranged weapon instead of an axe.. or lastly no ammunition... because they refuse to go
+hunting without a ranged weapon.
+
+Additionally some slightly problematic labors are also disabled by Conscript:
+Beekeeping
+Fishing
+
+Fishing - Intelligent Pets/Slaves will Fish. This can be problematic if they can't then
+    DROP them anywhere. They also may fish the map empty. Thus have a care if you enable
+    Fishing as Pet/slaves who can will Fish. Conversely, it can free other units for
+    other endeavors... provided you keep the other units from heading to the
+    watering hole. It is unknown if Toady One will ever patch away Intelligent Pet
+    fishing... as it can keep them from starving.
+Beekeeping - Formerly this was highly problematic. One Beekeeper would do a task and
+    another would come along try to do the same... and stand out in the cold and wet
+    doing little else but head back for food and drink before waiting to do whatever
+    task that is now IMPOSSIBLE. It's still managed by Conscript as you also don't
+    want a talented beekeeper costing you bees by dying with them in a grissly fashion
+    that ends your bees. Being on Fire comes to mind. Magma is always a problem as well.
+
+Command Data: - Said last so it's still on your screen -
+Conscript (parameters/arguments)
+
+(no arguments) - Active living units, are made adults by profession. Safe labors are toggled on
+debug - turns on debug data allowing for some informative spam.
+mine - Enables Mining and the Safe Labors.
+wood - Enables Woodcutting and the Safe Labors.
+hunt - Enables Hunting and the Safe Labors.
+fish - Enables Fishing and the Safe Labors.
+bees - Enables Beekeeping and the Safe Labors.
+
+Conscript accepts many arguments at the same time:
+Conscript debug mine bees - Enables Mining, Beekeeping, and the Safe Labors with Debug Spam.
+
+]])
+ return
+end
 --Lazy Pre-Run Variable Check
 --if debug==true then
 --print('Debug is (duh) ',debug,'Mine is ',mine,'Fish is ',fish,'Hunt is ',hunt,'Wood is ',wood,'Bees is ',bees)
