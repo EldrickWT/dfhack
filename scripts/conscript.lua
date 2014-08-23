@@ -1,6 +1,13 @@
---Turns babies and children into adults, and assigns all labors to everyone in the fortress -also checks for messed up labors, and taming.
+-- Turns babies and children into adults, and assigns all labors to everyone in the fortress -also checks for messed up labors, and taming.
 --I know it doesn't look it but I am trying to not just tabulate every single creature in the objects directory. Really I swear.
-debug = false
+--Lazy Variable Declarations... doesn't need all this readability
+local debug = false
+local mine = false
+local fish = false
+local hunt = false
+local wood = false
+local bees = false
+--Lazy Argument Checking... extra lines for readability
 for _,arg in ipairs({...}) do
     if string.lower(arg) == "debug" then debug = true end
 
@@ -10,7 +17,20 @@ for _,arg in ipairs({...}) do
     if string.lower(arg) == "wood" then wood = true end
     if string.lower(arg) == "bees" then bees = true end
 
+    if string.lower(arg) == "nomine" then mine = false end
+    if string.lower(arg) == "nofish" then fish = false end
+    if string.lower(arg) == "nohunt" then hunt = false end
+    if string.lower(arg) == "nowood" then wood = false end
+    if string.lower(arg) == "nobees" then bees = false end
+
 end
+--Lazy Help Section
+--TODO
+--Lazy Pre-Run Variable Check
+--if debug==true then
+--print('Debug is (duh) ',debug,'Mine is ',mine,'Fish is ',fish,'Hunt is ',hunt,'Wood is ',wood,'Bees is ',bees)
+--end
+--Lazy Code
 for _,v in ipairs(df.global.world.units.active) do
     if not (v.flags1.dead == true) then
         if v.civ_id == df.global.ui.civ_id then
@@ -77,7 +97,7 @@ for _,v in ipairs(df.global.world.units.active) do
               or (df.creature_raw.find(v.race).creature_id == "LOLI") --LOLI_CIV
               or (df.creature_raw.find(v.race).creature_id == "MEWLI") --MEWLI
               or (df.creature_raw.find(v.race).creature_id == "MLA") --MLA_CIV
-              or (df.creature_raw.find(v.race).creature_id == "PEDO") --PEDO ... 
+              or (df.creature_raw.find(v.race).creature_id == "PEDO") --PEDO ...
               or (df.creature_raw.find(v.race).creature_id == "FOOCUBI") --W_FOOCUBI_CIV
               or (df.creature_raw.find(v.race).creature_id == "PROUDHORN") --PROUDHORN_CIV
               or (df.creature_raw.find(v.race).creature_id == "VILEHORN") --VILEHORN_CIV
@@ -98,7 +118,8 @@ for _,v in ipairs(df.global.world.units.active) do
                 v.flags1.tame = false
                 v.training_level = 9
             end
-            v.flags1.on_ground=false 
+--Lazy SELECT CASTE ALL knockoff applied to LUA
+            v.flags1.on_ground=false
             if v.mood==8 then
                 v.mood=-1
             end
@@ -106,79 +127,79 @@ for _,v in ipairs(df.global.world.units.active) do
                 v.counters.soldier_mood_countdown=1
             end
             if mine==true then v.status.labors.MINE = true v.military.pickup_flags.update = true else v.status.labors.MINE = false end
-            v.status.labors.HAUL_STONE = true 
-            v.status.labors.HAUL_WOOD = true 
-            v.status.labors.HAUL_BODY = true 
-            v.status.labors.HAUL_FOOD = true 
-            v.status.labors.HAUL_REFUSE = true 
-            v.status.labors.HAUL_ITEM = true 
-            v.status.labors.HAUL_FURNITURE = true 
-            v.status.labors.HAUL_ANIMALS = true 
+            v.status.labors.HAUL_STONE = true
+            v.status.labors.HAUL_WOOD = true
+            v.status.labors.HAUL_BODY = true
+            v.status.labors.HAUL_FOOD = true
+            v.status.labors.HAUL_REFUSE = true
+            v.status.labors.HAUL_ITEM = true
+            v.status.labors.HAUL_FURNITURE = true
+            v.status.labors.HAUL_ANIMALS = true
             v.status.labors.CLEAN = true
             if wood==true then v.status.labors.CUTWOOD = true v.military.pickup_flags.update = true else v.status.labors.CUTWOOD = false end
-            v.status.labors.CARPENTER = true 
-            v.status.labors.DETAIL = true 
-            v.status.labors.MASON = true 
-            v.status.labors.ARCHITECT = true 
-            v.status.labors.ANIMALTRAIN = true 
-            v.status.labors.ANIMALCARE = true 
-            v.status.labors.DIAGNOSE = true 
-            v.status.labors.SURGERY = true 
-            v.status.labors.BONE_SETTING = true 
-            v.status.labors.SUTURING = true 
-            v.status.labors.DRESSING_WOUNDS = true 
-            v.status.labors.FEED_WATER_CIVILIANS = true 
-            v.status.labors.RECOVER_WOUNDED = true 
-            v.status.labors.BUTCHER = true 
-            v.status.labors.TRAPPER = true 
-            v.status.labors.DISSECT_VERMIN = true 
-            v.status.labors.LEATHER = true 
-            v.status.labors.TANNER = true 
-            v.status.labors.BREWER = true 
-            v.status.labors.ALCHEMIST = true 
-            v.status.labors.SOAP_MAKER = true 
-            v.status.labors.WEAVER = true 
-            v.status.labors.CLOTHESMAKER = true 
-            v.status.labors.MILLER = true 
-            v.status.labors.PROCESS_PLANT = true 
-            v.status.labors.MAKE_CHEESE = true 
-            v.status.labors.MILK = true 
-            v.status.labors.COOK = true 
-            v.status.labors.PLANT = true 
-            v.status.labors.HERBALIST = true 
+            v.status.labors.CARPENTER = true
+            v.status.labors.DETAIL = true
+            v.status.labors.MASON = true
+            v.status.labors.ARCHITECT = true
+            v.status.labors.ANIMALTRAIN = true
+            v.status.labors.ANIMALCARE = true
+            v.status.labors.DIAGNOSE = true
+            v.status.labors.SURGERY = true
+            v.status.labors.BONE_SETTING = true
+            v.status.labors.SUTURING = true
+            v.status.labors.DRESSING_WOUNDS = true
+            v.status.labors.FEED_WATER_CIVILIANS = true
+            v.status.labors.RECOVER_WOUNDED = true
+            v.status.labors.BUTCHER = true
+            v.status.labors.TRAPPER = true
+            v.status.labors.DISSECT_VERMIN = true
+            v.status.labors.LEATHER = true
+            v.status.labors.TANNER = true
+            v.status.labors.BREWER = true
+            v.status.labors.ALCHEMIST = true
+            v.status.labors.SOAP_MAKER = true
+            v.status.labors.WEAVER = true
+            v.status.labors.CLOTHESMAKER = true
+            v.status.labors.MILLER = true
+            v.status.labors.PROCESS_PLANT = true
+            v.status.labors.MAKE_CHEESE = true
+            v.status.labors.MILK = true
+            v.status.labors.COOK = true
+            v.status.labors.PLANT = true
+            v.status.labors.HERBALIST = true
             if fish==true then v.status.labors.FISH = true else v.status.labors.FISH = false end
-            v.status.labors.CLEAN_FISH = true 
-            v.status.labors.DISSECT_FISH = true 
+            v.status.labors.CLEAN_FISH = true
+            v.status.labors.DISSECT_FISH = true
             if hunt==true then v.status.labors.HUNT = true v.military.pickup_flags.update = true else v.status.labors.HUNT = false end
-            v.status.labors.SMELT = true 
-            v.status.labors.FORGE_WEAPON = true 
-            v.status.labors.FORGE_ARMOR = true 
-            v.status.labors.FORGE_FURNITURE = true 
-            v.status.labors.METAL_CRAFT = true 
-            v.status.labors.CUT_GEM = true 
-            v.status.labors.ENCRUST_GEM = true 
-            v.status.labors.WOOD_CRAFT = true 
-            v.status.labors.STONE_CRAFT = true 
-            v.status.labors.BONE_CARVE = true 
-            v.status.labors.GLASSMAKER = true 
-            v.status.labors.EXTRACT_STRAND = true 
-            v.status.labors.SIEGECRAFT = true 
-            v.status.labors.SIEGEOPERATE = true 
-            v.status.labors.BOWYER = true 
-            v.status.labors.MECHANIC = true 
-            v.status.labors.POTASH_MAKING = true 
-            v.status.labors.LYE_MAKING = true 
-            v.status.labors.DYER = true 
-            v.status.labors.BURN_WOOD = true 
-            v.status.labors.OPERATE_PUMP = true 
-            v.status.labors.SHEARER = true 
-            v.status.labors.SPINNER = true 
-            v.status.labors.POTTERY = true 
-            v.status.labors.GLAZING = true 
-            v.status.labors.PRESSING = true 
-            if bees==true then v.status.labors.BEEKEEPING = true else v.status.labors.BEEKEEPING = false end 
-            v.status.labors.WAX_WORKING = true 
-            v.status.labors.HANDLE_VEHICLES = true 
+            v.status.labors.SMELT = true
+            v.status.labors.FORGE_WEAPON = true
+            v.status.labors.FORGE_ARMOR = true
+            v.status.labors.FORGE_FURNITURE = true
+            v.status.labors.METAL_CRAFT = true
+            v.status.labors.CUT_GEM = true
+            v.status.labors.ENCRUST_GEM = true
+            v.status.labors.WOOD_CRAFT = true
+            v.status.labors.STONE_CRAFT = true
+            v.status.labors.BONE_CARVE = true
+            v.status.labors.GLASSMAKER = true
+            v.status.labors.EXTRACT_STRAND = true
+            v.status.labors.SIEGECRAFT = true
+            v.status.labors.SIEGEOPERATE = true
+            v.status.labors.BOWYER = true
+            v.status.labors.MECHANIC = true
+            v.status.labors.POTASH_MAKING = true
+            v.status.labors.LYE_MAKING = true
+            v.status.labors.DYER = true
+            v.status.labors.BURN_WOOD = true
+            v.status.labors.OPERATE_PUMP = true
+            v.status.labors.SHEARER = true
+            v.status.labors.SPINNER = true
+            v.status.labors.POTTERY = true
+            v.status.labors.GLAZING = true
+            v.status.labors.PRESSING = true
+            if bees==true then v.status.labors.BEEKEEPING = true else v.status.labors.BEEKEEPING = false end
+            v.status.labors.WAX_WORKING = true
+            v.status.labors.HANDLE_VEHICLES = true
             v.status.labors.HAUL_TRADE = true
             v.status.labors.PULL_LEVER = true
             v.status.labors.REMOVE_CONSTRUCTION = true

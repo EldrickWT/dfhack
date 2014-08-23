@@ -1307,7 +1307,7 @@ DFHACK_PLUGIN("strangemood");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
 {
-    commands.push_back(PluginCommand("strangemood", "Force a strange mood to happen.\n", df_strangemood, false,
+    commands.push_back(PluginCommand("strangemood", "Force a strange mood to happen.", df_strangemood, false,
         "Options:\n"
          "  -force         - Ignore standard mood preconditions.\n"
          "  -unit          - Use the selected unit instead of picking one randomly.\n"

@@ -30,7 +30,7 @@ command_result syndromeTrigger(color_ostream& out, vector<string>& parameters);
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
-    commands.push_back(PluginCommand("syndromeTrigger", "Run commands and enable true transformations, configured by the raw files.\n", &syndromeTrigger, false,
+    commands.push_back(PluginCommand("syndromeTrigger", "Run commands and enable true transformations, configured by the raw files.", &syndromeTrigger, false,
         "syndromeTrigger:\n"
         "  syndromeTrigger 0 //disable\n"
         "  syndromeTrigger 1 //enable\n"

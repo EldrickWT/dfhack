@@ -51,7 +51,7 @@ void processJob(color_ostream& out, void* jobPtr);
 int32_t giveSyndrome(color_ostream& out, int32_t workerId, df::syndrome* syndrome, ResetPolicy::ResetPolicy policy);
 
 DFhackCExport command_result plugin_init(color_ostream& out, vector<PluginCommand> &commands) {
-    commands.push_back(PluginCommand("autoSyndrome", "Automatically give units syndromes when they complete jobs, as configured in the raw files.\n", &autoSyndrome, false,
+    commands.push_back(PluginCommand("autoSyndrome", "Automatically give units syndromes when they complete jobs, as configured in the raw files.", &autoSyndrome, false,
         "autoSyndrome:\n"
         "  autoSyndrome 0 //disable\n"
         "  autoSyndrome 1 //enable\n"
