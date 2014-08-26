@@ -102,7 +102,7 @@ for _,v in ipairs(df.global.ui.parties) do
     local pos = utils.getBuildingCenter(v.location)
     if is_in_burrows(pos) then
         v.timer = 0
-        for _, u in ipairs(v.units) do
+        for _,unit in ipairs(v.units) do
             add_thought(unit, df.unit_thought_type.Tired)
         end
     end
