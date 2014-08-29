@@ -421,8 +421,17 @@ struct trade_hook : public df::viewscreen_dwarfmodest
         auto dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
-        int y = 24;
-        OutputToggleString(x, y, "Auto trade", "Shift-T", monitor.isMonitored(sp), true, left_margin);
+        int y = dims.y2 - 4;
+        
+        int links = 0;
+        links += sp->links.give_to_pile.size();
+        links += sp->links.take_from_pile.size();
+        links += sp->links.give_to_workshop.size();
+        links += sp->links.take_from_workshop.size();
+        if (links + 12 >= y)
+           y += 4;
+        
+        OutputToggleString(x, y, "Auto trade", "T", monitor.isMonitored(sp), true, left_margin, COLOR_WHITE, COLOR_LIGHTRED);
     }
 };
 
@@ -480,15 +489,19 @@ struct tradeview_hook : public df::viewscreen_tradegoodsst
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
         INTERPOSE_NEXT(render)();
+        
+        // Insert into the blank line between trade items and standard keys.
+        // The blank line at the bottom is taken by the search plugin.
+        auto dim = Screen::getWindowSize();
+        int y = dim.y - 5;
+        
         int x = 2;
-        int y = 27;
-        OutputHotkeyString(x, y, "Mark all", "m", true, 2);
-        OutputHotkeyString(x, y, "Unmark all", "u");
+        OutputHotkeyString(x, y, "Mark all, ", "m", false, x, COLOR_WHITE, COLOR_LIGHTRED);
+        OutputHotkeyString(x, y, "Unmark all", "u", false, x, COLOR_WHITE, COLOR_LIGHTRED);
 
         x = 42;
-        y = 27;
-        OutputHotkeyString(x, y, "Mark all", "Shift-m", true, 42);
-        OutputHotkeyString(x, y, "Unmark all", "Shift-u");
+        OutputHotkeyString(x, y, "Mark all, ", "M", false, x, COLOR_WHITE, COLOR_LIGHTRED);
+        OutputHotkeyString(x, y, "Unmark all", "U", false, x, COLOR_WHITE, COLOR_LIGHTRED);
     }
 };
 
