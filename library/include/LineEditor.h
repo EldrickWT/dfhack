@@ -53,5 +53,10 @@ namespace DFHack
         bool cursor_right_word ();
         bool cursor_start ();
         bool cursor_end ();
+
+        bool yank_left ();
+        bool yank_right ();
+        bool yank_paste ();
+        bool transpose ();
     };
 }

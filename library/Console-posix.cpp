@@ -451,6 +451,7 @@ namespace DFHack
             size_t plen = prompt.size();
             int history_index = 0;
             line_editor->line = "";
+            line_editor->cursor = 0;
             /* The latest history entry is always our current buffer, that
              * initially is just an empty string. */
             const std::string empty;
@@ -468,28 +469,6 @@ namespace DFHack
                     return -2;
                 }
                 lock->lock();
-                /* Only autocomplete when the callback is set. It returns < 0 when
-                 * there was an error reading from fd. Otherwise it will return the
-                 * character that should be handled next. */
-                if (c == 9)
-                {
-                    /*
-                    if( completionCallback != NULL) {
-                        c = completeLine(fd,prompt,buf,buflen,&len,&pos,cols);
-                        // Return on errors
-                        if (c < 0) return len;
-                        // Read next character when 0
-                        if (c == 0) continue;
-                    }
-                    else
-                    {
-                        // ignore tab
-                        continue;
-                    }
-                    */
-                    // just ignore tabs
-                    continue;
-                }
 
                 switch(c)
                 {
@@ -514,11 +493,13 @@ namespace DFHack
                     lock->lock();
                     if (seq[0] == 'b')
                     {
-                        //back_word();
+                        if (line_editor->cursor_left_word())
+                            prompt_refresh();
                     }
                     else if (seq[0] == 'f')
                     {
-                        //forward_word();
+                        if (line_editor->cursor_right_word())
+                            prompt_refresh();
                     }
                     else if(seq[0] == '[')
                     {
@@ -588,6 +569,7 @@ namespace DFHack
                                 // delete
                                 if (line_editor->fwd_delete())
                                     prompt_refresh();
+                                break;
                             }
                             if (!read_char(seq3[0]) || !read_char(seq3[1]))
                             {
@@ -600,47 +582,34 @@ namespace DFHack
                                 // Ignore first character (second "n")
                                 if (seq3[1] == 'C')
                                 {
-                                    //forward_word();
+                                    if (line_editor->cursor_right_word())
+                                        prompt_refresh();
                                 }
                                 else if (seq3[1] == 'D')
                                 {
-                                    //back_word();
+                                    if (line_editor->cursor_left_word())
+                                        prompt_refresh();
                                 }
                             }
                         }
                     }
                     break;
-                //case 21: // Ctrl+u, delete from current to beginning of line.
-                //    if (raw_cursor > 0)
-                //        yank_buffer = raw_buffer.substr(0, raw_cursor);
-                //    raw_buffer.erase(0, raw_cursor);
-                //    raw_cursor = 0;
-                //    prompt_refresh();
-                //    break;
-                //case 11: // Ctrl+k, delete from current to end of line.
-                //    if (raw_cursor < raw_buffer.size())
-                //        yank_buffer = raw_buffer.substr(raw_cursor);
-                //    raw_buffer.erase(raw_cursor);
-                //    prompt_refresh();
-                //    break;
-                //case 25: // Ctrl+y, paste last text deleted with Ctrl+u/k
-                //    if (yank_buffer.size())
-                //    {
-                //        raw_buffer.insert(raw_cursor, yank_buffer);
-                //        raw_cursor += yank_buffer.size();
-                //        prompt_refresh();
-                //    }
-                //    break;
-                //case 20: // Ctrl+t, transpose current and previous characters
-                //    if (raw_buffer.size() >= 2 && raw_cursor > 0)
-                //    {
-                //        if (raw_cursor == raw_buffer.size())
-                //            raw_cursor--;
-                //        std::swap(raw_buffer[raw_cursor - 1], raw_buffer[raw_cursor]);
-                //        raw_cursor++;
-                //        prompt_refresh();
-                //    }
-                //    break;
+                case 21: // Ctrl+u, delete from current to beginning of line.
+                    if (line_editor->yank_left())
+                        prompt_refresh();
+                    break;
+                case 11: // Ctrl+k, delete from current to end of line.
+                    if (line_editor->yank_right())
+                        prompt_refresh();
+                    break;
+                case 25: // Ctrl+y, paste last text deleted with Ctrl+u/k
+                    if (line_editor->yank_paste())
+                        prompt_refresh();
+                    break;
+                case 20: // Ctrl+t, transpose current and previous characters
+                    if (line_editor->transpose())
+                        prompt_refresh();
+                    break;
                 case 1: // Ctrl+a, go to the start of the line
                     if (line_editor->cursor_start())
                         prompt_refresh();
@@ -656,27 +625,6 @@ namespace DFHack
                 default:
                     if (c >= 32)  // Space
                     {
-                        //if (raw_buffer.size() == size_t(raw_cursor))
-                        //{
-                        //    raw_buffer.append(1,c);
-                        //    raw_cursor++;
-                        //    if (plen+raw_buffer.size() < size_t(get_columns()))
-                        //    {
-                        //        /* Avoid a full update of the line in the
-                        //         * trivial case. */
-                        //        if (::write(fd,&c,1) == -1) return -1;
-                        //    }
-                        //    else
-                        //    {
-                        //        prompt_refresh();
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    raw_buffer.insert(raw_cursor,1,c);
-                        //    raw_cursor++;
-                        //    prompt_refresh();
-                        //}
                         if (line_editor->insert(c))
                         {
                             if ((line_editor->cursor != line_editor->line.size()) &&

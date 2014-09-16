@@ -81,12 +81,31 @@ bool LineEditor::cursor_right (int dist)
 
 bool LineEditor::cursor_left_word ()
 {
-    cursor_left(10);
+    if (cursor <= 0)
+        return false;
+    cursor--;
+    while (cursor > 0 && !isalnum(line[cursor]))
+        cursor--;
+    while (cursor > 0 && isalnum(line[cursor]))
+        cursor--;
+    if (!isalnum(line[cursor]) && cursor != 0)
+        cursor++;
+    check_cursor();
+    return true;
 }
 
 bool LineEditor::cursor_right_word ()
 {
-    cursor_right(10);
+    int len = line.size();
+    if (cursor >= len)
+        return false;
+    cursor++;
+    while (cursor <= len && !isalnum(line[cursor]))
+        cursor++;
+    while (cursor <= len && isalnum(line[cursor]))
+        cursor++;
+    check_cursor();
+    return true;
 }
 
 bool LineEditor::cursor_start ()
@@ -107,3 +126,49 @@ bool LineEditor::cursor_end ()
     return true;
 }
 
+bool LineEditor::yank_left ()
+{
+    check_cursor();
+    if (cursor == 0)
+        return false;
+    yank_clipboard = line.substr(0, cursor);
+    line.erase(0, cursor);
+    cursor = 0;
+    return true;
+}
+
+bool LineEditor::yank_right ()
+{
+    check_cursor();
+    if (cursor >= line.size())
+        return false;
+    yank_clipboard = line.substr(cursor);
+    line.erase(cursor);
+    cursor = line.size();
+    return true;
+}
+
+bool LineEditor::yank_paste ()
+{
+    if (!yank_clipboard.size())
+        return false;
+    check_cursor();
+    line.insert(cursor, yank_clipboard);
+    cursor += yank_clipboard.size();
+    return true;
+}
+
+bool LineEditor::transpose ()
+{
+    check_cursor();
+    if (line.size() >= 2 && cursor > 0)
+    {
+        if (cursor == line.size())
+            cursor--;
+        std::swap(line[cursor - 1], line[cursor]);
+        cursor++;
+        return true;
+    }
+    else
+        return false;
+}
