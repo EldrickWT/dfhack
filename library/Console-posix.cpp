@@ -71,6 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "Console.h"
+#include "LineEditor.h"
 #include "Hooks.h"
 using namespace DFHack;
 
@@ -145,6 +146,7 @@ namespace DFHack
             in_batch = false;
             supported_terminal = false;
             state = con_unclaimed;
+            line_editor = new LineEditor();
         };
         virtual ~Private()
         {
@@ -308,39 +310,39 @@ namespace DFHack
         }
         /// beep. maybe?
         //void beep (void);
-        void back_word()
-        {
-            if (raw_cursor == 0)
-                return;
-            raw_cursor--;
-            while (raw_cursor > 0 && !isalnum(raw_buffer[raw_cursor]))
-                raw_cursor--;
-            while (raw_cursor > 0 && isalnum(raw_buffer[raw_cursor]))
-                raw_cursor--;
-            if (!isalnum(raw_buffer[raw_cursor]) && raw_cursor != 0)
-                raw_cursor++;
-            prompt_refresh();
-        }
-        void forward_word()
-        {
-            int len = raw_buffer.size();
-            if (raw_cursor == len)
-                return;
-            raw_cursor++;
-            while (raw_cursor <= len && !isalnum(raw_buffer[raw_cursor]))
-                raw_cursor++;
-            while (raw_cursor <= len && isalnum(raw_buffer[raw_cursor]))
-                raw_cursor++;
-            if (raw_cursor > len)
-                raw_cursor = len;
-            prompt_refresh();
-        }
+        //void back_word()
+        //{
+        //    if (raw_cursor == 0)
+        //        return;
+        //    raw_cursor--;
+        //    while (raw_cursor > 0 && !isalnum(raw_buffer[raw_cursor]))
+        //        raw_cursor--;
+        //    while (raw_cursor > 0 && isalnum(raw_buffer[raw_cursor]))
+        //        raw_cursor--;
+        //    if (!isalnum(raw_buffer[raw_cursor]) && raw_cursor != 0)
+        //        raw_cursor++;
+        //    prompt_refresh();
+        //}
+        //void forward_word()
+        //{
+        //    int len = raw_buffer.size();
+        //    if (raw_cursor == len)
+        //        return;
+        //    raw_cursor++;
+        //    while (raw_cursor <= len && !isalnum(raw_buffer[raw_cursor]))
+        //        raw_cursor++;
+        //    while (raw_cursor <= len && isalnum(raw_buffer[raw_cursor]))
+        //        raw_cursor++;
+        //    if (raw_cursor > len)
+        //        raw_cursor = len;
+        //    prompt_refresh();
+        //}
         /// A simple line edit (raw mode)
         int lineedit(const std::string& prompt, std::string& output, recursive_mutex * lock, CommandHistory & ch)
         {
             output.clear();
             reset_color();
-            this->prompt = prompt;
+            line_editor->prompt = prompt;
             if (!supported_terminal)
             {
                 print(prompt.c_str());
@@ -364,7 +366,7 @@ namespace DFHack
                 print("\n");
                 if(count != -1)
                 {
-                    output = raw_buffer;
+                    output = line_editor->line;
                 }
                 return count;
             }
@@ -413,10 +415,10 @@ namespace DFHack
         {
             char seq[64];
             int cols = get_columns();
-            int plen = prompt.size();
-            const char * buf = raw_buffer.c_str();
-            int len = raw_buffer.size();
-            int cooked_cursor = raw_cursor;
+            int plen = line_editor->prompt.size();
+            const char * buf = line_editor->line.c_str();
+            int len = line_editor->line.size();
+            int cooked_cursor = line_editor->cursor;
             // Use math! This is silly.
             while((plen+cooked_cursor) >= cols)
             {
@@ -430,10 +432,10 @@ namespace DFHack
             }
             /* Cursor to left edge */
             snprintf(seq,64,"\x1b[1G");
-            if (::write(STDIN_FILENO,seq,strlen(seq)) == -1) return;
+            if (::write(STDIN_FILENO, seq, strlen(seq)) == -1) return;
             /* Write the prompt and the current buffer content */
-            if (::write(STDIN_FILENO,prompt.c_str(),plen) == -1) return;
-            if (::write(STDIN_FILENO,buf,len) == -1) return;
+            if (::write(STDIN_FILENO, line_editor->prompt.c_str(), plen) == -1) return;
+            if (::write(STDIN_FILENO, buf, len) == -1) return;
             /* Erase to right */
             snprintf(seq,64,"\x1b[0K");
             if (::write(STDIN_FILENO,seq,strlen(seq)) == -1) return;
@@ -445,15 +447,15 @@ namespace DFHack
         int prompt_loop(recursive_mutex * lock, CommandHistory & history)
         {
             int fd = STDIN_FILENO;
+            std::string prompt = line_editor->prompt;
             size_t plen = prompt.size();
             int history_index = 0;
-            raw_buffer.clear();
-            raw_cursor = 0;
+            line_editor->line = "";
             /* The latest history entry is always our current buffer, that
              * initially is just an empty string. */
             const std::string empty;
             history.add(empty);
-            if (::write(fd,prompt.c_str(),prompt.size()) == -1) return -1;
+            if (::write(fd, prompt.c_str(), prompt.size()) == -1) return -1;
             while(1)
             {
                 unsigned char c;
@@ -493,18 +495,14 @@ namespace DFHack
                 {
                 case 13:    // enter
                     history.remove();
-                    return raw_buffer.size();
+                    return line_editor->line.size();
                 case 3:     // ctrl-c
                     errno = EAGAIN;
                     return -1;
                 case 127:   // backspace
                 case 8:     // ctrl-h
-                    if (raw_cursor > 0 && raw_buffer.size() > 0)
-                    {
-                        raw_buffer.erase(raw_cursor-1,1);
-                        raw_cursor--;
+                    if (line_editor->backspace())
                         prompt_refresh();
-                    }
                     break;
                 case 27:    // escape sequence
                     lock->unlock();
@@ -516,11 +514,11 @@ namespace DFHack
                     lock->lock();
                     if (seq[0] == 'b')
                     {
-                        back_word();
+                        //back_word();
                     }
                     else if (seq[0] == 'f')
                     {
-                        forward_word();
+                        //forward_word();
                     }
                     else if(seq[0] == '[')
                     {
@@ -531,22 +529,13 @@ namespace DFHack
                         }
                         if (seq[1] == 'D')
                         {
-                            left_arrow:
-                            if (raw_cursor > 0)
-                            {
-                                raw_cursor--;
+                            if (line_editor->cursor_left())
                                 prompt_refresh();
-                            }
                         }
                         else if ( seq[1] == 'C')
                         {
-                            right_arrow:
-                            /* right arrow */
-                            if (size_t(raw_cursor) != raw_buffer.size())
-                            {
-                                raw_cursor++;
+                            if (line_editor->cursor_right())
                                 prompt_refresh();
-                            }
                         }
                         else if (seq[1] == 'A' || seq[1] == 'B')
                         {
@@ -555,7 +544,7 @@ namespace DFHack
                             {
                                 /* Update the current history entry before to
                                  * overwrite it with tne next one. */
-                                history[history_index] = raw_buffer;
+                                history[history_index] = line_editor->line;
                                 /* Show the new entry */
                                 history_index += (seq[1] == 'A') ? 1 : -1;
                                 if (history_index < 0)
@@ -568,22 +557,20 @@ namespace DFHack
                                     history_index = history.size()-1;
                                     break;
                                 }
-                                raw_buffer = history[history_index];
-                                raw_cursor = raw_buffer.size();
+                                line_editor->line = history[history_index];
+                                line_editor->cursor_end();
                                 prompt_refresh();
                             }
                         }
                         else if(seq[1] == 'H')
                         {
-                            // home
-                            raw_cursor = 0;
-                            prompt_refresh();
+                            if (line_editor->cursor_start())
+                                prompt_refresh();
                         }
                         else if(seq[1] == 'F')
                         {
-                            // end
-                            raw_cursor = raw_buffer.size();
-                            prompt_refresh();
+                            if (line_editor->cursor_end())
+                                prompt_refresh();
                         }
                         else if (seq[1] > '0' && seq[1] < '7')
                         {
@@ -599,11 +586,8 @@ namespace DFHack
                             if (seq[1] == '3' && seq2 == '~' )
                             {
                                 // delete
-                                if (raw_buffer.size() > 0 && size_t(raw_cursor) < raw_buffer.size())
-                                {
-                                    raw_buffer.erase(raw_cursor,1);
+                                if (line_editor->fwd_delete())
                                     prompt_refresh();
-                                }
                             }
                             if (!read_char(seq3[0]) || !read_char(seq3[1]))
                             {
@@ -616,87 +600,100 @@ namespace DFHack
                                 // Ignore first character (second "n")
                                 if (seq3[1] == 'C')
                                 {
-                                    forward_word();
+                                    //forward_word();
                                 }
                                 else if (seq3[1] == 'D')
                                 {
-                                    back_word();
+                                    //back_word();
                                 }
                             }
                         }
                     }
                     break;
-                case 21: // Ctrl+u, delete from current to beginning of line.
-                    if (raw_cursor > 0)
-                        yank_buffer = raw_buffer.substr(0, raw_cursor);
-                    raw_buffer.erase(0, raw_cursor);
-                    raw_cursor = 0;
-                    prompt_refresh();
-                    break;
-                case 11: // Ctrl+k, delete from current to end of line.
-                    if (raw_cursor < raw_buffer.size())
-                        yank_buffer = raw_buffer.substr(raw_cursor);
-                    raw_buffer.erase(raw_cursor);
-                    prompt_refresh();
-                    break;
-                case 25: // Ctrl+y, paste last text deleted with Ctrl+u/k
-                    if (yank_buffer.size())
-                    {
-                        raw_buffer.insert(raw_cursor, yank_buffer);
-                        raw_cursor += yank_buffer.size();
-                        prompt_refresh();
-                    }
-                    break;
-                case 20: // Ctrl+t, transpose current and previous characters
-                    if (raw_buffer.size() >= 2 && raw_cursor > 0)
-                    {
-                        if (raw_cursor == raw_buffer.size())
-                            raw_cursor--;
-                        std::swap(raw_buffer[raw_cursor - 1], raw_buffer[raw_cursor]);
-                        raw_cursor++;
-                        prompt_refresh();
-                    }
-                    break;
+                //case 21: // Ctrl+u, delete from current to beginning of line.
+                //    if (raw_cursor > 0)
+                //        yank_buffer = raw_buffer.substr(0, raw_cursor);
+                //    raw_buffer.erase(0, raw_cursor);
+                //    raw_cursor = 0;
+                //    prompt_refresh();
+                //    break;
+                //case 11: // Ctrl+k, delete from current to end of line.
+                //    if (raw_cursor < raw_buffer.size())
+                //        yank_buffer = raw_buffer.substr(raw_cursor);
+                //    raw_buffer.erase(raw_cursor);
+                //    prompt_refresh();
+                //    break;
+                //case 25: // Ctrl+y, paste last text deleted with Ctrl+u/k
+                //    if (yank_buffer.size())
+                //    {
+                //        raw_buffer.insert(raw_cursor, yank_buffer);
+                //        raw_cursor += yank_buffer.size();
+                //        prompt_refresh();
+                //    }
+                //    break;
+                //case 20: // Ctrl+t, transpose current and previous characters
+                //    if (raw_buffer.size() >= 2 && raw_cursor > 0)
+                //    {
+                //        if (raw_cursor == raw_buffer.size())
+                //            raw_cursor--;
+                //        std::swap(raw_buffer[raw_cursor - 1], raw_buffer[raw_cursor]);
+                //        raw_cursor++;
+                //        prompt_refresh();
+                //    }
+                //    break;
                 case 1: // Ctrl+a, go to the start of the line
-                    raw_cursor = 0;
-                    prompt_refresh();
+                    if (line_editor->cursor_start())
+                        prompt_refresh();
                     break;
                 case 5: // ctrl+e, go to the end of the line
-                    raw_cursor = raw_buffer.size();
-                    prompt_refresh();
+                    if (line_editor->cursor_end())
+                        prompt_refresh();
                     break;
                 case 12: // ctrl+l, clear screen
                     clear();
                     prompt_refresh();
+                    break;
                 default:
                     if (c >= 32)  // Space
                     {
-                        if (raw_buffer.size() == size_t(raw_cursor))
+                        //if (raw_buffer.size() == size_t(raw_cursor))
+                        //{
+                        //    raw_buffer.append(1,c);
+                        //    raw_cursor++;
+                        //    if (plen+raw_buffer.size() < size_t(get_columns()))
+                        //    {
+                        //        /* Avoid a full update of the line in the
+                        //         * trivial case. */
+                        //        if (::write(fd,&c,1) == -1) return -1;
+                        //    }
+                        //    else
+                        //    {
+                        //        prompt_refresh();
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    raw_buffer.insert(raw_cursor,1,c);
+                        //    raw_cursor++;
+                        //    prompt_refresh();
+                        //}
+                        if (line_editor->insert(c))
                         {
-                            raw_buffer.append(1,c);
-                            raw_cursor++;
-                            if (plen+raw_buffer.size() < size_t(get_columns()))
+                            if ((line_editor->cursor != line_editor->line.size()) &&
+                                (plen+line_editor->line.size() < size_t(get_columns())))
                             {
                                 /* Avoid a full update of the line in the
                                  * trivial case. */
                                 if (::write(fd,&c,1) == -1) return -1;
                             }
                             else
-                            {
                                 prompt_refresh();
-                            }
                         }
-                        else
-                        {
-                            raw_buffer.insert(raw_cursor,1,c);
-                            raw_cursor++;
-                            prompt_refresh();
-                        }
-                        break;
                     }
+                    break;
                 }
             }
-            return raw_buffer.size();
+            return line_editor->line.size();
         }
         FILE * dfout_C;
         bool supported_terminal;
@@ -710,10 +707,7 @@ namespace DFHack
             con_lineedit
         } state;
         bool in_batch;
-        std::string prompt;      // current prompt string
-        std::string raw_buffer;  // current raw mode buffer
-        std::string yank_buffer; // last text deleted with Ctrl-K/Ctrl-U
-        int raw_cursor;          // cursor position in the buffer
+        LineEditor* line_editor;
         // thread exit mechanism
         int exit_pipe[2];
         fd_set descriptor_set;
