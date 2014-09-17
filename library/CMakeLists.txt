@@ -25,6 +25,7 @@ include/DFHack.h
 include/Console.h
 include/Core.h
 include/ColorText.h
+include/LineEditor.h
 include/DataDefs.h
 include/DataIdentity.h
 include/VTableInterpose.h
@@ -53,6 +54,7 @@ include/wdirent.h
 SET(MAIN_SOURCES
 Core.cpp
 ColorText.cpp
+LineEditor.cpp
 DataDefs.cpp
 VTableInterpose.cpp
 LuaWrapper.cpp

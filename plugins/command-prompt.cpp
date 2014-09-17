@@ -5,6 +5,7 @@
 #include <Export.h>
 #include <PluginManager.h>
 #include <ColorText.h>
+#include <LineEditor.h>
 
 #include <modules/Screen.h>
 #include <modules/Gui.h>
@@ -25,8 +26,6 @@ using namespace df::enums;
 using df::global::ui;
 using df::global::gps;
 using df::global::enabler;
-
-std::vector<std::string> command_history;
 
 class viewscreen_commandpromptst;
 class prompt_ostream:public buffered_color_ostream
@@ -55,22 +54,13 @@ public:
     {
         show_fps=gps->display_frames;
         gps->display_frames=0;
-        cursor_pos = 0;
         frame = 0;
-        history_idx = command_history.size();
-        if (history_idx > 0)
-        {
-            if (command_history[history_idx - 1] == "")
-            {
-                command_history.pop_back();
-                history_idx--;
-            }
-        }
-        command_history.push_back(entry);
+        line_editor = new LineEditor;
     }
     ~viewscreen_commandpromptst()
     {
         gps->display_frames=show_fps;
+        delete line_editor;
     }
 
     void add_response(color_value v, std::string s)
@@ -82,45 +72,10 @@ public:
             responses.push_back(std::make_pair(v, part + '\n'));
         }
     }
-    std::string get_entry()
-    {
-        return command_history[history_idx];
-    }
-    void set_entry(std::string entry)
-    {
-        command_history[history_idx] = entry;
-    }
-    void back_word()
-    {
-        std::string entry = get_entry();
-        if (cursor_pos == 0)
-            return;
-        cursor_pos--;
-        while (cursor_pos > 0 && !isalnum(entry[cursor_pos]))
-            cursor_pos--;
-        while (cursor_pos > 0 && isalnum(entry[cursor_pos]))
-            cursor_pos--;
-        if (!isalnum(entry[cursor_pos]) && cursor_pos != 0)
-            cursor_pos++;
-    }
-    void forward_word()
-    {
-        std::string entry = get_entry();
-        int len = entry.size();
-        if (cursor_pos == len)
-            return;
-        cursor_pos++;
-        while (cursor_pos <= len && !isalnum(entry[cursor_pos]))
-            cursor_pos++;
-        while (cursor_pos <= len && isalnum(entry[cursor_pos]))
-            cursor_pos++;
-        if (cursor_pos > len)
-            cursor_pos = len;
-    }
 
 protected:
     std::list<std::pair<color_value,std::string> > responses;
-    int cursor_pos;
+    LineEditor* line_editor;
     int history_idx;
     bool is_response;
     bool show_fps;
@@ -159,21 +114,21 @@ void viewscreen_commandpromptst::render()
     }
     else
     {
-        std::string entry = get_entry();
+        std::string entry = line_editor->line;
         Screen::fillRect(Screen::Pen(' ', 7, 0),0,0,dim.x,0);
         Screen::paintString(Screen::Pen(' ', 7, 0), 0, 0,"[DFHack]#");
         std::string cursor = (frame < enabler->gfps / 2) ? "_" : " ";
-        if(cursor_pos < (dim.x - 10))
+        if(line_editor->cursor < (dim.x - 10))
         {
             Screen::paintString(Screen::Pen(' ', 7, 0), 10,0 , entry);
             if (entry.size() > dim.x - 10)
                 Screen::paintTile(Screen::Pen('\032', 7, 0), dim.x - 1, 0);
             if (cursor != " ")
-                Screen::paintString(Screen::Pen(' ', 10, 0), 10 + cursor_pos, 0, cursor);
+                Screen::paintString(Screen::Pen(' ', 10, 0), 10 + line_editor->cursor, 0, cursor);
         }
         else
         {
-            size_t start = cursor_pos - dim.x + 10 + 1;
+            size_t start = line_editor->cursor - dim.x + 10 + 1;
             Screen::paintTile(Screen::Pen('\033', 7, 0), 9, 0);
             Screen::paintString(Screen::Pen(' ', 7, 0), 10, 0, entry.substr(start));
             if (cursor != " ")
@@ -190,7 +145,7 @@ void viewscreen_commandpromptst::submit()
         return;
     }
     prompt_ostream out(this);
-    Core::getInstance().runCommand(out, get_entry());
+    Core::getInstance().runCommand(out, line_editor->line);
     if(out.empty() && responses.empty())
         Screen::dismiss(this);
     else
@@ -200,8 +155,7 @@ void viewscreen_commandpromptst::submit()
 }
 void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
 {
-    int old_pos = cursor_pos;
-    std::string entry = get_entry();
+    int old_pos = line_editor->cursor;
     bool leave_all = events->count(interface_key::LEAVESCREEN_ALL);
     if (leave_all || events->count(interface_key::LEAVESCREEN))
     {
@@ -213,8 +167,6 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
             parent->feed(events);
             events->clear();
         }
-        //if (command_history.size() && !entry.size())
-        //    command_history.pop_back();
         return;
     }
     if (events->count(interface_key::SELECT))
@@ -227,75 +179,70 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
     for (auto it = events->begin(); it != events->end(); ++it)
     {
         auto key = *it;
-        if (key==interface_key::STRING_A000) //delete?
+        if (key==interface_key::STRING_A000) //delete
         {
-            if(entry.size() && cursor_pos > 0)
-            {
-                entry.erase(cursor_pos - 1, 1);
-                cursor_pos--;
-            }
-            if(cursor_pos > entry.size())
-                cursor_pos = entry.size();
+            line_editor->backspace();
             continue;
         }
         int charcode = Screen::keyToChar(key);
         if (charcode > 0)
         {
-            entry.insert(cursor_pos, 1, char(charcode));
-            cursor_pos++;
-            set_entry(entry);
+            line_editor->insert(char(charcode));
             return;
         }
     }
     // Prevent number keys from moving cursor
     if(events->count(interface_key::CURSOR_RIGHT))
     {
-        cursor_pos++;
-        if (cursor_pos > entry.size())
-            cursor_pos = entry.size();
+        line_editor->cursor_right();
     }
     else if(events->count(interface_key::CURSOR_LEFT))
     {
-        cursor_pos--;
-        if (cursor_pos < 0) cursor_pos = 0;
+        line_editor->cursor_left();
     }
     else if(events->count(interface_key::CURSOR_RIGHT_FAST))
     {
-        forward_word();
+        line_editor->cursor_right_word();
     }
     else if(events->count(interface_key::CURSOR_LEFT_FAST))
     {
-        back_word();
+        line_editor->cursor_left_word();
     }
     else if(events->count(interface_key::CUSTOM_CTRL_A))
     {
-        cursor_pos = 0;
+        line_editor->cursor_start();
     }
     else if(events->count(interface_key::CUSTOM_CTRL_E))
     {
-        cursor_pos = entry.size();
+        line_editor->cursor_end();
+    }
+    else if(events->count(interface_key::CUSTOM_CTRL_U) ||
+            events->count(interface_key::CUSTOM_CTRL_I))
+    {
+        // Ctrl-I avoids conflict with interface_key::PREFIX (Ctrl-U by default)
+        line_editor->yank_left();
+    }
+    else if(events->count(interface_key::CUSTOM_CTRL_K))
+    {
+        line_editor->yank_right();
+    }
+    else if(events->count(interface_key::CUSTOM_CTRL_Y))
+    {
+        line_editor->yank_paste();
+    }
+    else if(events->count(interface_key::CUSTOM_CTRL_T))
+    {
+        line_editor->transpose();
     }
     else if(events->count(interface_key::CURSOR_UP))
     {
-        history_idx--;
-        if (history_idx < 0)
-            history_idx = 0;
-        entry = get_entry();
-        cursor_pos = entry.size();
+        // line_editor->history_back();
     }
     else if(events->count(interface_key::CURSOR_DOWN))
     {
-        if (history_idx < command_history.size() - 1)
-        {
-            history_idx++;
-            if (history_idx >= command_history.size())
-                history_idx = command_history.size() - 1;
-            entry = get_entry();
-            cursor_pos = entry.size();
-        }
+        // line_editor->history_fwd();
     }
-    set_entry(entry);
-    if (old_pos != cursor_pos)
+    if (old_pos != line_editor->cursor)
         frame = 0;
 
 }
