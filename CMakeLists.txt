@@ -58,7 +58,7 @@ if (NOT EXISTS ${dfhack_SOURCE_DIR}/library/xml/codegen.pl OR NOT EXISTS ${dfhac
 endif()
 
 # set up versioning.
-set(DF_VERSION "0.40.10")
+set(DF_VERSION "0.40.12")
 SET(DFHACK_RELEASE "r1" CACHE STRING "Current release revision.")
 
 set(DFHACK_VERSION "${DF_VERSION}-${DFHACK_RELEASE}")
@@ -168,7 +168,7 @@ add_subdirectory(depends)
 IF(BUILD_LIBRARY)
     add_subdirectory (library)
     ## install the default documentation files
-    install(FILES LICENSE "Lua API.html" Readme.html Compile.html Contributors.html DESTINATION ${DFHACK_USERDOC_DESTINATION})
+    install(FILES LICENSE NEWS "Lua API.html" Readme.html Compile.html Contributors.html DESTINATION ${DFHACK_USERDOC_DESTINATION})
     install(DIRECTORY images DESTINATION ${DFHACK_USERDOC_DESTINATION})
 endif()
 
@@ -182,7 +182,7 @@ IF(UNIX)
     if(APPLE)
         SET(CPACK_GENERATOR "ZIP")
     else()
-        SET(CPACK_GENERATOR "TGZ")
+        SET(CPACK_GENERATOR "TBZ2")
     endif()
 ELSEIF(WIN32)
     SET(CPACK_GENERATOR "ZIP")

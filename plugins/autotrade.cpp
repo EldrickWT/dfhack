@@ -8,6 +8,7 @@
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/viewscreen_tradegoodsst.h"
 #include "df/building_stockpilest.h"
+#include "modules/Buildings.h"
 #include "modules/Items.h"
 #include "df/building_tradedepotst.h"
 #include "df/general_ref_building_holderst.h"
@@ -202,8 +203,6 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
     if (!depot_info.findDepot())
         return;
 
-    std::vector<df::item*> &items = world->items.other[items_other_id::IN_PLAY];
-
 
     // Precompute a bitmask with the bad flags
     df::item_flags bad_flags;
@@ -218,18 +217,19 @@ static void mark_all_in_stockpiles(vector<PersistentStockpileInfo> &stockpiles)
 
     size_t marked_count = 0;
     size_t error_count = 0;
-    for (size_t i = 0; i < items.size(); i++)
+    for (auto it = stockpiles.begin(); it != stockpiles.end(); it++)
     {
-        df::item *item = items[i];
-        if (item->flags.whole & bad_flags.whole)
+        if (!it->isValid())
             continue;
 
-        if (!is_valid_item(item))
-            continue;
-
-        for (auto it = stockpiles.begin(); it != stockpiles.end(); it++)
+        Buildings::StockpileIterator stored;
+        for (stored.begin(it->getStockpile()); !stored.done(); ++stored)
         {
-            if (!it->inStockpile(item))
+            df::item *item = *stored;
+            if (item->flags.whole & bad_flags.whole)
+                continue;
+
+            if (!is_valid_item(item))
                 continue;
 
             // In case of container, check contained items for mandates
@@ -421,17 +421,24 @@ struct trade_hook : public df::viewscreen_dwarfmodest
         auto dims = Gui::getDwarfmodeViewDims();
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
-        int y = dims.y2 - 4;
+        int y = dims.y2 - 5;
         
         int links = 0;
         links += sp->links.give_to_pile.size();
         links += sp->links.take_from_pile.size();
         links += sp->links.give_to_workshop.size();
         links += sp->links.take_from_workshop.size();
-        if (links + 12 >= y)
-           y += 4;
+        bool state = monitor.isMonitored(sp);
         
-        OutputToggleString(x, y, "Auto trade", "T", monitor.isMonitored(sp), true, left_margin, COLOR_WHITE, COLOR_LIGHTRED);
+        if (links + 12 >= y) {
+            y = dims.y2;
+            OutputString(COLOR_WHITE, x, y, "Auto: ");
+            x += 5;
+            OutputString(COLOR_LIGHTRED, x, y, "T");
+            OutputString(state? COLOR_LIGHTGREEN: COLOR_GREY, x, y, "rade ");
+        } else {
+            OutputToggleString(x, y, "Auto trade", "T", state, true, left_margin, COLOR_WHITE, COLOR_LIGHTRED);
+        }
     }
 };
 
@@ -489,6 +496,13 @@ struct tradeview_hook : public df::viewscreen_tradegoodsst
     DEFINE_VMETHOD_INTERPOSE(void, render, ())
     {
         INTERPOSE_NEXT(render)();
+        
+        if (counteroffer.size() > 0)
+        {
+            // The merchant is proposing a counteroffer,
+            // so there is nothing to mark.
+            return;
+        }
         
         // Insert into the blank line between trade items and standard keys.
         // The blank line at the bottom is taken by the search plugin.
@@ -567,7 +581,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
     commands.push_back(
         PluginCommand(
         "autotrade", "Automatically send items in marked stockpiles to trade depot, when trading is possible.",
-        autotrade_cmd, false, "Run 'autotrade version' to query the plugin version."));
+        autotrade_cmd, false, "Run 'autotrade version' to query the plugin version.\n"));
 
     return CR_OK;
 }

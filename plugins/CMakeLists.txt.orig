@@ -89,8 +89,11 @@ if (BUILD_SUPPORTED)
     DFHACK_PLUGIN(autodump autodump.cpp)
     DFHACK_PLUGIN(autolabor autolabor.cpp)
     DFHACK_PLUGIN(automaterial automaterial.cpp)
+<<<<<<< HEAD
     DFHACK_PLUGIN(autoSyndrome autoSyndrome.cpp)
+=======
     DFHACK_PLUGIN(automelt automelt.cpp)
+>>>>>>> 1983a05fb5799362f1c46d41a8ca1dd8a79f91cc
     DFHACK_PLUGIN(autotrade autotrade.cpp)
     DFHACK_PLUGIN(building-hacks building-hacks.cpp LINK_LIBRARIES lua)
     DFHACK_PLUGIN(buildingplan buildingplan.cpp)

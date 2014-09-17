@@ -1,3 +1,5 @@
 VC2010
 *.bat
 *.txt
+_CPack_Packages
+*.tar.*
