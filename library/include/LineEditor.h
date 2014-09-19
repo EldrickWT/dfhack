@@ -26,6 +26,7 @@ distribution.
 
 #include <string>
 
+#include "Console.h"
 #include "Export.h"
 
 namespace DFHack
@@ -42,21 +43,27 @@ namespace DFHack
         std::string line;
         std::string yank_clipboard;
         std::string prompt;
+        CommandHistory history;
+        int history_index;
         void check_cursor();
 
-        bool insert (char ch);
-        bool backspace ();
-        bool fwd_delete ();
-        bool cursor_left (int dist = 1);
-        bool cursor_right (int dist = 1);
-        bool cursor_left_word ();
-        bool cursor_right_word ();
-        bool cursor_start ();
-        bool cursor_end ();
+        bool insert(char ch);
+        bool backspace();
+        bool fwd_delete();
+        bool cursor_left(int dist = 1);
+        bool cursor_right(int dist = 1);
+        bool cursor_left_word();
+        bool cursor_right_word();
+        bool cursor_start();
+        bool cursor_end();
 
-        bool yank_left ();
-        bool yank_right ();
-        bool yank_paste ();
-        bool transpose ();
+        bool history_move(int delta);
+        bool history_back() { return history_move(-1); };
+        bool history_fwd() { return history_move(1); };
+
+        bool yank_left();
+        bool yank_right();
+        bool yank_paste();
+        bool transpose();
     };
 }

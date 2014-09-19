@@ -27,6 +27,8 @@ using df::global::ui;
 using df::global::gps;
 using df::global::enabler;
 
+CommandHistory cmdprompt_history;
+
 class viewscreen_commandpromptst;
 class prompt_ostream:public buffered_color_ostream
 {
@@ -56,6 +58,9 @@ public:
         gps->display_frames=0;
         frame = 0;
         line_editor = new LineEditor;
+        cmdprompt_history.add("");
+        line_editor->history = cmdprompt_history;
+        line_editor->history_index = 0;
     }
     ~viewscreen_commandpromptst()
     {
@@ -76,7 +81,6 @@ public:
 protected:
     std::list<std::pair<color_value,std::string> > responses;
     LineEditor* line_editor;
-    int history_idx;
     bool is_response;
     bool show_fps;
     int frame;
@@ -139,11 +143,14 @@ void viewscreen_commandpromptst::render()
 void viewscreen_commandpromptst::submit()
 {
     CoreSuspendClaimer suspend;
-    if(is_response)
+    if(is_response || line_editor->line.size() == 0)
     {
         Screen::dismiss(this);
         return;
     }
+    line_editor->history.remove();
+    line_editor->history.add(line_editor->line);
+    line_editor->history.save("command-prompt.history");
     prompt_ostream out(this);
     Core::getInstance().runCommand(out, line_editor->line);
     if(out.empty() && responses.empty())
@@ -236,11 +243,11 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
     }
     else if(events->count(interface_key::CURSOR_UP))
     {
-        // line_editor->history_back();
+        line_editor->history_back();
     }
     else if(events->count(interface_key::CURSOR_DOWN))
     {
-        // line_editor->history_fwd();
+        line_editor->history_fwd();
     }
     if (old_pos != line_editor->cursor)
         frame = 0;
@@ -269,6 +276,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
         "command-prompt","Shows a command prompt on window.",show_prompt,hotkey_allow_all,
         "command-prompt [entry] - shows a cmd prompt in df window. Entry is used for default prefix (e.g. ':lua')"
         ));
+    cmdprompt_history.load("command-prompt.history");
     return CR_OK;
 }
 

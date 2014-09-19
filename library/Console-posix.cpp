@@ -449,13 +449,14 @@ namespace DFHack
             int fd = STDIN_FILENO;
             std::string prompt = line_editor->prompt;
             size_t plen = prompt.size();
-            int history_index = 0;
             line_editor->line = "";
             line_editor->cursor = 0;
             /* The latest history entry is always our current buffer, that
              * initially is just an empty string. */
             const std::string empty;
             history.add(empty);
+            line_editor->history_index = 0;
+            line_editor->history = history;
             if (::write(fd, prompt.c_str(), prompt.size()) == -1) return -1;
             while(1)
             {
@@ -520,28 +521,8 @@ namespace DFHack
                         }
                         else if (seq[1] == 'A' || seq[1] == 'B')
                         {
-                            /* up and down arrow: history */
-                            if (history.size() > 1)
-                            {
-                                /* Update the current history entry before to
-                                 * overwrite it with tne next one. */
-                                history[history_index] = line_editor->line;
-                                /* Show the new entry */
-                                history_index += (seq[1] == 'A') ? 1 : -1;
-                                if (history_index < 0)
-                                {
-                                    history_index = 0;
-                                    break;
-                                }
-                                else if (size_t(history_index) >= history.size())
-                                {
-                                    history_index = history.size()-1;
-                                    break;
-                                }
-                                line_editor->line = history[history_index];
-                                line_editor->cursor_end();
+                            if (line_editor->history_move((seq[1] == 'A') ? -1 : 1))
                                 prompt_refresh();
-                            }
                         }
                         else if(seq[1] == 'H')
                         {

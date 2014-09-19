@@ -34,7 +34,7 @@ void LineEditor::check_cursor()
         cursor = line.size();
 }
 
-bool LineEditor::insert (char ch)
+bool LineEditor::insert(char ch)
 {
     check_cursor();
     line.insert(cursor, 1, ch);
@@ -42,7 +42,7 @@ bool LineEditor::insert (char ch)
     return true;
 }
 
-bool LineEditor::backspace ()
+bool LineEditor::backspace()
 {
     check_cursor();
     if (cursor == 0)
@@ -52,7 +52,7 @@ bool LineEditor::backspace ()
     return true;
 }
 
-bool LineEditor::fwd_delete ()
+bool LineEditor::fwd_delete()
 {
     check_cursor();
     if (cursor == line.size())
@@ -61,7 +61,7 @@ bool LineEditor::fwd_delete ()
     return true;
 }
 
-bool LineEditor::cursor_left (int dist)
+bool LineEditor::cursor_left(int dist)
 {
     if (cursor == 0)
         return false;
@@ -70,7 +70,7 @@ bool LineEditor::cursor_left (int dist)
     return true;
 }
 
-bool LineEditor::cursor_right (int dist)
+bool LineEditor::cursor_right(int dist)
 {
     if (cursor == line.size())
         return false;
@@ -79,7 +79,7 @@ bool LineEditor::cursor_right (int dist)
     return true;
 }
 
-bool LineEditor::cursor_left_word ()
+bool LineEditor::cursor_left_word()
 {
     if (cursor <= 0)
         return false;
@@ -94,7 +94,7 @@ bool LineEditor::cursor_left_word ()
     return true;
 }
 
-bool LineEditor::cursor_right_word ()
+bool LineEditor::cursor_right_word()
 {
     int len = line.size();
     if (cursor >= len)
@@ -108,7 +108,7 @@ bool LineEditor::cursor_right_word ()
     return true;
 }
 
-bool LineEditor::cursor_start ()
+bool LineEditor::cursor_start()
 {
     check_cursor();
     if (cursor == 0)
@@ -117,7 +117,7 @@ bool LineEditor::cursor_start ()
     return true;
 }
 
-bool LineEditor::cursor_end ()
+bool LineEditor::cursor_end()
 {
     check_cursor();
     if (cursor == line.size())
@@ -126,7 +126,32 @@ bool LineEditor::cursor_end ()
     return true;
 }
 
-bool LineEditor::yank_left ()
+bool LineEditor::history_move(int delta)
+{
+    /* Positive delta moves forward */
+    if (history.size() > 1)
+    {
+        /* Update the current history entry before to
+         * overwrite it with the next one. */
+        history[history_index] = line;
+        /* Show the new entry */
+        history_index -= delta;
+        if (history_index < 0)
+        {
+            history_index = 0;
+        }
+        else if (size_t(history_index) >= history.size())
+        {
+            history_index = history.size() - 1;
+        }
+        line = history[history_index];
+        cursor_end();
+        return true;
+    }
+    return false;
+}
+
+bool LineEditor::yank_left()
 {
     check_cursor();
     if (cursor == 0)
@@ -137,7 +162,7 @@ bool LineEditor::yank_left ()
     return true;
 }
 
-bool LineEditor::yank_right ()
+bool LineEditor::yank_right()
 {
     check_cursor();
     if (cursor >= line.size())
@@ -148,7 +173,7 @@ bool LineEditor::yank_right ()
     return true;
 }
 
-bool LineEditor::yank_paste ()
+bool LineEditor::yank_paste()
 {
     if (!yank_clipboard.size())
         return false;
@@ -158,7 +183,7 @@ bool LineEditor::yank_paste ()
     return true;
 }
 
-bool LineEditor::transpose ()
+bool LineEditor::transpose()
 {
     check_cursor();
     if (line.size() >= 2 && cursor > 0)
