@@ -21,6 +21,7 @@ using namespace std;
 #include <df/caste_raw.h>
 #include <df/creature_raw.h>
 #include <df/unit.h>
+#include <df/unit_soul.h>
 
 #include "df/world.h"
 #include "df/historical_entity.h"
@@ -79,15 +80,14 @@ command_result fixhappiness (color_ostream &out, vector <string> & parameters)
 			df::unit * unit = world->units.all[i];
 			if(unit->pos.x == cursorX && unit->pos.y == cursorY && unit->pos.z == cursorZ)
 			{
-				if(unit->status.happiness >= 101)
+				if(unit->status.current_soul->personality.stress_level >= 101)
 					continue;
 				out.print("fixing happiness... for unit id:%d aka %s\n", unit->id, Translation::TranslateName(&unit->name, false).c_str());
-				for(auto iter = unit->status.recent_events.begin(); iter != unit->status.recent_events.end(); iter++)
-				{ //0-129, 212-216, 220-221 are bad mmmkay... aka if unit->status.recent_events[*].type = 0-129, 212-216, 220-221 then delete the bugger.
-					delete *iter;
-				}
-				unit->status.recent_events.clear();
-				unit->status.happiness = 100;
+//				for(auto iter = unit->status.current_soul->personality.emotions.begin(); ; iter != unit->status.current_soul->personality.emotions.end(); iter++)
+//				{ //0-129, 212-216, 220-221 are bad mmmkay... aka if unit->status.recent_events[*].type = 0-129, 212-216, 220-221 then delete the bugger.
+//					delete *iter;
+//				}
+				unit->status.current_soul->personality.stress_level = 10;
 				continue;
 			}
 		}
