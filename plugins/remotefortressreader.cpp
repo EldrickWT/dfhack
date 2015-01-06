@@ -57,6 +57,9 @@ using namespace RemoteFortressReader;
 using namespace std;
 using df::global::world;
 
+DFHACK_PLUGIN("RemoteFortressReader");
+REQUIRE_GLOBAL(world);
+
 // Here go all the command declarations...
 // mostly to allow having the mandatory stuff on top of the file and commands on the bottom
 
@@ -80,10 +83,6 @@ const char* growth_locations[] = {
     "SHRUB"
 };
 #define GROWTH_LOCATIONS_SIZE 8
-
-// A plugin must be able to return its name and version.
-// The name string provided must correspond to the filename - skeleton.plug.so or skeleton.plug.dll in this case
-DFHACK_PLUGIN("RemoteFortressReader");
 
 // Mandatory init function. If you have some global state, create it here.
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
@@ -510,7 +509,7 @@ static command_result GetGrowthList(color_ostream &stream, const EmptyMessage *i
 
 
 
-    df::world_raws *raws = &df::global::world->raws;
+    df::world_raws *raws = &world->raws;
     if (!raws)
         return CR_OK;//'.
 
@@ -618,9 +617,9 @@ static command_result GetPlantList(color_ostream &stream, const BlockRequest *in
     for (int xx = min_x; xx < max_x; xx++)
     for (int yy = min_y; yy < max_y; yy++)
     {
-        if (xx < 0 || yy < 0 || xx >= df::global::world->map.x_count_block || yy >= df::global::world->map.y_count_block)
+        if (xx < 0 || yy < 0 || xx >= world->map.x_count_block || yy >= world->map.y_count_block)
             continue;
-        df::map_block_column * column = df::global::world->map.column_index[xx][yy];
+        df::map_block_column * column = world->map.column_index[xx][yy];
         for (int i = 0; i < column->plants.size(); i++)
         {
             df::plant * plant = column->plants[i];

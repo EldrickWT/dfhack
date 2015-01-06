@@ -45,6 +45,27 @@ function eraseSyndrome(unit,syndromeId,oldestFirst)
  return false
 end
 
+local function eraseSyndromeClassHelper(unit,synclass)
+ for i,unitSyndrome in ipairs(unit.syndromes.active) do
+  local syndrome = df.syndrome.find(unitSyndrome.type)
+  for _,class in ipairs(syndrome.syn_class) do
+   if class.value == synclass then
+    unit.syndromes.active:erase(i)
+    return true
+   end
+  end
+ end
+ return false
+end
+
+function eraseSyndromeClass(unit,synclass)
+ local count=0
+ while eraseSyndromeClassHelper(unit,synclass) do
+  count = count+1
+ end
+ return count
+end
+
 function eraseSyndromes(unit,syndromeId)
  local count=0
  while eraseSyndrome(unit,syndromeId,true) do
@@ -119,7 +140,7 @@ function isValidTarget(unit,syndrome)
  end
  for caste,creature in ipairs(syndrome.syn_affected_creature) do
   local affectedCreature = creature.value
-  local affectedCaste = syndrome.syn_affectedCaste[caste].value
+  local affectedCaste = syndrome.syn_affected_caste[caste].value
   if affectedCreature == unitRaceName and (affectedCaste == unitCasteName or affectedCaste == "ALL") then
    affected = true
   end

@@ -4,6 +4,7 @@
 
 # show all current key bindings
 keybinding add Ctrl-F1 hotkeys
+keybinding add Alt-F1 hotkeys
 
 # toggle the display of water level as 1-7 tiles
 keybinding add Ctrl-W twaterlvl
@@ -51,8 +52,9 @@ keybinding add Ctrl-Shift-F@dwarfmode forum-dwarves
 # Generic adv mode bindings  #
 ##############################
 
-keybinding add Ctrl-B adv-bodyswap
-keybinding add Ctrl-Shift-B "adv-bodyswap force"
+keybinding add Ctrl-B@dungeonmode adv-bodyswap
+keybinding add Ctrl-Shift-B@dungeonmode "adv-bodyswap force"
+keybinding add Shift-O@dungeonmode gui/companion-order
 
 ##############################
 # Generic legends bindings   #
@@ -60,7 +62,6 @@ keybinding add Ctrl-Shift-B "adv-bodyswap force"
 
 # export all information, or just the detailed maps (doesn't handle site maps)
 keybinding add Ctrl-A@legends "exportlegends all"
-keybinding add Ctrl-D@legends "exportlegends maps"
 
 #############################
 # Context-specific bindings #
@@ -72,8 +73,12 @@ keybinding add Ctrl-Shift-Z@dwarfmode/Default "stocks show"
 # open an overview window summarising some stocks (dfstatus)
 keybinding add Ctrl-Shift-I@dwarfmode/Default "gui/dfstatus"
 
-# q->stockpile; p - copy & paste stockpiles
+# q->stockpile - copy & paste stockpiles
 keybinding add Alt-P copystock
+
+# q->stockpile - load and save stockpile settings out of game
+keybinding add Alt-L@dwarfmode/QueryBuilding/Some/Stockpile "gui/stockpiles -load"
+keybinding add Alt-S@dwarfmode/QueryBuilding/Some/Stockpile "gui/stockpiles -save"
 
 # q->workshop - duplicate the selected job
 keybinding add Ctrl-D job-duplicate
@@ -139,9 +144,6 @@ keybinding add P@dwarfmode/QueryBuilding/Some/Weaponrack gui/assign-rack
 # stabilize the cursor of dwarfmode when switching menus
 tweak stable-cursor
 
-# stop military from considering training as 'patrol duty'
-tweak patrol-duty
-
 # stop stacked liquid/bar/thread/cloth items from lasting forever
 # if used in reactions that use only a fraction of the dimension.
 # might be fixed by DF
@@ -169,6 +171,16 @@ tweak craft-age-wear
 # stop adamantine clothing from wearing out (bug 6481)
 #tweak adamantine-cloth-wear
 
+# Add "Select all" and "Deselect all" options to farm plot menus
+tweak farm-plot-select
+
+# Add Shift-Left/Right controls to import agreement screen
+tweak import-priority-category
+
+# Misc. UI tweaks
+tweak civ-view-agreement
+tweak max-wheelbarrow
+
 ###########################
 # Globally acting plugins #
 ###########################
@@ -183,7 +195,7 @@ enable search
 enable automaterial
 
 # Other interface improvement tools
-enable dwarfmonitor mousequery automelt autotrade buildingplan resume zone
+enable dwarfmonitor mousequery automelt autotrade buildingplan resume trackstop zone stocks autochop stockpiles
 
 # allow the fortress bookkeeper to queue jobs through the manager
 stockflow enable

@@ -33,6 +33,8 @@ distribution.
 #include <string>
 #include <stdint.h>
 
+#include "modules/Graphic.h"
+
 // function and variable pointer... we don't try to understand what SDL does here
 typedef void * fPtr;
 typedef void * vPtr;

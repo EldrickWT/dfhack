@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <map>
 #include <algorithm>
+#include <functional>
 #include <vector>
 
 using namespace std;
@@ -37,8 +38,10 @@ using namespace std;
 
 using namespace DFHack;
 using namespace df::enums;
-using df::global::world;
 using df::coord2d;
+
+DFHACK_PLUGIN("prospector");
+REQUIRE_GLOBAL(world);
 
 struct matdata
 {
@@ -196,8 +199,6 @@ void printVeins(color_ostream &con, MatMap &mat_map,
 }
 
 command_result prospector (color_ostream &out, vector <string> & parameters);
-
-DFHACK_PLUGIN("prospector");
 
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {

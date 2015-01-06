@@ -61,6 +61,7 @@ using namespace DFHack;
 #include "df/world_data.h"
 #include "df/interfacest.h"
 #include "df/viewscreen_dwarfmodest.h"
+#include "df/viewscreen_game_cleanerst.h"
 #include "df/viewscreen_loadgamest.h"
 #include "df/viewscreen_savegamest.h"
 #include <df/graphic.h>
@@ -965,6 +966,8 @@ void Core::fatal (std::string output, bool deactivate)
 #ifndef LINUX_BUILD
     out << "Check file stderr.log for details\n";
     MessageBox(0,out.str().c_str(),"DFHack error!", MB_OK | MB_ICONERROR);
+#else
+    cout << "DFHack fatal error: " << out.str() << std::endl;
 #endif
 }
 
@@ -1027,12 +1030,15 @@ bool Core::Init()
 
     cerr << "Initializing Console.\n";
     // init the console.
-    bool is_text_mode = false;
-    if(init && init->display.flag.is_set(init_display_flags::TEXT))
+    bool is_text_mode = (init && init->display.flag.is_set(init_display_flags::TEXT));
+    if (is_text_mode || getenv("DFHACK_DISABLE_CONSOLE"))
     {
-        is_text_mode = true;
         con.init(true);
         cerr << "Console is not available. Use dfhack-run to send commands.\n";
+        if (!is_text_mode)
+        {
+            cout << "Console disabled.\n";
+        }
     }
     else if(con.init(false))
         cerr << "Console is running.\n";
@@ -1280,6 +1286,7 @@ void Core::doUpdate(color_ostream &out, bool first_update)
     }
 
     bool is_load_save =
+        strict_virtual_cast<df::viewscreen_game_cleanerst>(screen) ||
         strict_virtual_cast<df::viewscreen_loadgamest>(screen) ||
         strict_virtual_cast<df::viewscreen_savegamest>(screen);
 
@@ -1572,6 +1579,8 @@ int UnicodeAwareSym(const SDL::KeyboardEvent& ke)
 //MEMO: return false if event is consumed
 int Core::DFH_SDL_Event(SDL::Event* ev)
 {
+    static bool alt = 0;
+
     // do NOT process events before we are ready.
     if(!started) return true;
     if(!ev)
@@ -1580,6 +1589,11 @@ int Core::DFH_SDL_Event(SDL::Event* ev)
     {
         auto ke = (SDL::KeyboardEvent *)ev;
 
+        if (ke->ksym.sym == SDL::K_LALT || ke->ksym.sym == SDL::K_RALT)
+        {
+            alt = (ev->type == SDL::ET_KEYDOWN);
+        }
+        else
         if(ke->state == SDL::BTN_PRESSED && !hotkey_states[ke->ksym.sym])
         {
             hotkey_states[ke->ksym.sym] = true;
@@ -1587,7 +1601,7 @@ int Core::DFH_SDL_Event(SDL::Event* ev)
             int mod = 0;
             if (ke->ksym.mod & SDL::KMOD_SHIFT) mod |= 1;
             if (ke->ksym.mod & SDL::KMOD_CTRL) mod |= 2;
-            if (ke->ksym.mod & SDL::KMOD_ALT) mod |= 4;
+            if (alt) mod |= 4;
 
             // Use unicode so Windows gives the correct value for the
             // user's Input Language

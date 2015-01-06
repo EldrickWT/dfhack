@@ -21,13 +21,10 @@
 using namespace DFHack;
 using namespace std;
 
-using df::global::world;
-// using df::global::process_jobs;
-// using df::global::process_dig;
+DFHACK_PLUGIN("digFlood");
+REQUIRE_GLOBAL(world);
 
 command_result digFlood (color_ostream &out, std::vector <std::string> & parameters);
-
-DFHACK_PLUGIN("digFlood");
 
 void onDig(color_ostream& out, void* ptr);
 void maybeExplore(color_ostream& out, MapExtras::MapCache& cache, df::coord pt, set<df::coord>& jobLocations);
@@ -72,7 +69,7 @@ DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <Plug
         "  digFlood digAll0\n"
         "    disable digAll mode\n"
         "\n"
-        "Note that while order matters, multiple commands can be sequenced in one line. It is recommended to alter your dfhack.init file so that you won't have to type in every mineral type you want to dig every time you start the game. Material names are case sensitive.\n"
+        "Note that while order matters, multiple commands can be sequenced in one line. It is recommended to alter your save-specific regionX/raw/onLoad.init or global onLoadWorld.init file so that you won't have to type in every mineral type you want to dig every time you start the game. Material names are case sensitive.\n"
     ));
     return CR_OK;
 }
@@ -178,8 +175,10 @@ command_result digFlood (color_ostream &out, std::vector <std::string> & paramet
             continue;
         }
         
-        if ( parameters[a] == "CLEAR" )
+        if ( parameters[a] == "CLEAR" ) {
             autodigMaterials.clear();
+            continue;
+        }
         
         if ( parameters[a] == "digAll0" ) {
             digAll = false;

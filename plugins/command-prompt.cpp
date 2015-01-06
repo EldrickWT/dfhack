@@ -23,9 +23,10 @@
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::ui;
-using df::global::gps;
-using df::global::enabler;
+DFHACK_PLUGIN("command-prompt");
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(gps);
+REQUIRE_GLOBAL(enabler);
 
 CommandHistory cmdprompt_history;
 
@@ -50,6 +51,10 @@ public:
     void render();
     void help() { }
     int8_t movies_okay() { return 0; }
+
+    df::unit* getSelectedUnit() { return Gui::getAnyUnit(parent); }
+    df::item* getSelectedItem() { return Gui::getAnyItem(parent); }
+    df::building* getSelectedBuilding() { return Gui::getAnyBuilding(parent); }
 
     std::string getFocusString() { return "commandprompt"; }
     viewscreen_commandpromptst(std::string entry):is_response(false)
@@ -253,7 +258,7 @@ void viewscreen_commandpromptst::feed(std::set<df::interface_key> *events)
         frame = 0;
 
 }
-DFHACK_PLUGIN("command-prompt");
+
 command_result show_prompt(color_ostream &out, std::vector <std::string> & parameters)
 {
     if (Gui::getCurFocus() == "dfhack/commandprompt")

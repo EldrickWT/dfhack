@@ -37,9 +37,12 @@ using std::string;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::gps;
-using df::global::gview;
-using df::global::ui;
+DFHACK_PLUGIN("search");
+DFHACK_PLUGIN_IS_ENABLED(is_enabled);
+
+REQUIRE_GLOBAL(gps);
+REQUIRE_GLOBAL(gview);
+REQUIRE_GLOBAL(ui);
 
 /*
 Search Plugin
@@ -1093,8 +1096,7 @@ public:
         {
             int32_t x = 2;
             int32_t y = gps->dimy - 3;
-            make_text_dim(2, 37, y);
-            make_text_dim(42, gps->dimx-2, y);
+            make_text_dim(2, gps->dimx-2, y);
             OutputString(COLOR_LIGHTRED, x, y, string(1, select_key + 'A' - 'a'));
             OutputString(COLOR_WHITE, x, y, ": Clear search to trade           ");
         }
@@ -1138,14 +1140,13 @@ public:
             return;
         }
         
-        print_search_option(42, -1);
+        int32_t x = gps->dimx / 2 + 2;
+        print_search_option(x, -1);
 
         if (!search_string.empty())
         {
-            int32_t x = 42;
             int32_t y = gps->dimy - 3;
-            make_text_dim(2, 37, y);
-            make_text_dim(42, gps->dimx-2, y);
+            make_text_dim(2, gps->dimx-2, y);
             OutputString(COLOR_LIGHTRED, x, y, string(1, select_key + 'A' - 'a'));
             OutputString(COLOR_WHITE, x, y, ": Clear search to trade           ");
         }
@@ -1669,10 +1670,6 @@ IMPLEMENT_HOOKS(df::viewscreen_dwarfmodest, burrow_search);
 // END: Burrow assignment search
 //
 
-
-
-DFHACK_PLUGIN("search");
-DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 #define SEARCH_HOOKS \
     HOOK_ACTION(unitlist_search_hook) \

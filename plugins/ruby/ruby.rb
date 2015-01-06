@@ -179,7 +179,7 @@ module DFHack
             if not onlylastpart
                 out << name.first_name if name.first_name != ''
                 if name.nickname != ''
-                    case respond_to?(:d_init) && d_init.nickname_dwarf
+                    case respond_to?(:d_init) && d_init.nickname[gametype]
                     when :REPLACE_ALL; return "`#{name.nickname}'"
                     when :REPLACE_FIRST; out.pop
                     end
@@ -241,7 +241,7 @@ end
 
 # load autogenned file
 require './hack/ruby/ruby-autogen-defs'
-require './hack/ruby/ruby-autogen'
+require(RUBY_PLATFORM =~ /mswin|mingw|cygwin/i ? './hack/ruby/ruby-autogen-win' : './hack/ruby/ruby-autogen-gcc')
 
 # load all modules
-Dir['./hack/ruby/*.rb'].each { |m| require m.chomp('.rb') }
+Dir['./hack/ruby/*.rb'].each { |m| require m.chomp('.rb') if m !~ /ruby-autogen/ }

@@ -308,11 +308,56 @@ twaterlvl
 ---------
 Toggle between displaying/not displaying liquid depth as numbers.
 
+stockpile settings management
+-----------------------------
+
+Save and load stockpile settings. See the gui/stockpiles for an in-game GUI to
+this plugin.
+
 copystock
-----------
+~~~~~~~~~
+
 Copies the parameters of the currently highlighted stockpile to the custom
 stockpile settings and switches to custom stockpile placement mode, effectively
 allowing you to copy/paste stockpiles easily.
+
+savestock
+~~~~~~~~~
+
+Saves the currently highlighted stockpile's settings to a file in your Dwarf
+Fortress folder. This file can be used to copy settings between game saves or
+players.
+
+example:
+
+```
+savestock food_settings.dfstock
+```
+
+loadstock
+~~~~~~~~~
+
+Loads a saved stockpile settings file and applies it to the currently selected
+stockpile.
+
+example:
+
+```
+loadstock food_settings.dfstock
+```
+
+To use savestock and loadstock, use the 'q' command to highlight a stockpile.
+Then run savestock giving it a descriptive filename. Then, in a different (or
+same!) gameworld, you can highlight any stockpile with 'q' then execute the
+'loadstock' command passing it the name of that file. The settings will be
+applied to that stockpile.
+
+**Notes:** It saves and loads files relative to the DF folder, so put your files
+there or in a subfolder for easy access. Filenames should not have spaces.
+
+**Limitations:** Generated materials, divine metals, etc are not saved as they
+are different in every world.
+
 
 rename
 ------
@@ -336,8 +381,8 @@ Options:
 
 command-prompt
 --------------
-A one line command prompt in df. Same as entering command into dfhack console. Best 
-used as a keybinding. Can be called with optional "entry" that will start prompt with 
+A one line command prompt in df. Same as entering command into dfhack console. Best
+used as a keybinding. Can be called with optional "entry" that will start prompt with
 that pre-filled.
 
 .. image:: images/command-prompt.png
@@ -598,7 +643,7 @@ dfhack command line and can't be used from a hotkey. Settings will be remembered
 as long as dfhack runs. Intended for use in combination with the command
 liquids-here (which can be bound to a hotkey).
 
-For more information, refer to the command's internal help. 
+For more information, refer to the command's internal help.
 
 .. note::
 
@@ -786,7 +831,7 @@ out if you have any of them running around in your fort. Dead and passive
 creatures (ghosts who were put to rest, killed vampires, ...) are ignored.
 Undead skeletons, corpses, bodyparts and the like are all thrown into the curse
 category "zombie". Anonymous zombies and resurrected body parts will show
-as "unnamed creature". 
+as "unnamed creature".
 
 Options:
 
@@ -838,7 +883,7 @@ Options:
 :hell:  Show the Z range of HFS tubes. Implies 'all'.
 
 Pre-embark estimate
-...................
+~~~~~~~~~~~~~~~~~~~
 
 If prospect is called during the embark selection screen, it displays an estimate of
 layer stone availability.
@@ -1258,11 +1303,6 @@ One-shot subcommands:
 Subcommands that persist until disabled or DF quit:
 
 :stable-cursor:  Saves the exact cursor position between t/q/k/d/etc menus of dwarfmode.
-:patrol-duty:    Makes Train orders not count as patrol duty to stop unhappy thoughts.
-                 Does NOT fix the problem when soldiers go off-duty (i.e. civilian).
-
-:stable-temp:    Fixes performance bug 6012 by squashing jitter in temperature updates.
-                 In very item-heavy forts with big stockpiles this can improve FPS by 50-100%
 :fast-heat:      Further improves temperature update performance by ensuring that 1 degree
                  of item temperature is crossed in no more than specified number of frames
                  when updating from the environment temperature. This reduces the time it
@@ -1271,7 +1311,7 @@ Subcommands that persist until disabled or DF quit:
                     in advmode. The issue is that the screen tries to force you to select
                     the contents separately from the container. This forcefully skips child
                     reagents.
-:fast-trade:     Makes Shift-Enter in the Move Goods to Depot and Trade screens select
+:fast-trade:     Makes Shift-Down in the Move Goods to Depot and Trade screens select
                  the current item (fully, in case of a stack), and scroll down one line.
 :military-stable-assign: Preserve list order and cursor position when assigning to squad,
                          i.e. stop the rightmost list of the Positions page of the military
@@ -1286,7 +1326,14 @@ Subcommands that persist until disabled or DF quit:
 
 :adamantine-cloth-wear: Prevents adamantine clothing from wearing out while being worn (bug 6481).
 
-:confirm-embark: Adds a prompt before embarking (on the "prepare carefully" screen).
+:farm-plot-select:          Adds "Select all" and "Deselect all" options to farm plot menus
+:import-priority-category:  Allows changing the priority of all goods in a
+                            category when discussing an import agreement with the liaison
+:manager-quantity:          Removes the limit of 30 jobs per manager order
+:civ-view-agreement:        Fixes overlapping text on the "view agreement" screen
+:nestbox-color:		    Fixes the color of built nestboxes
+:eggs-fertile:        Displays a fertility indicator on nestboxes
+:max-wheelbarrow:     Allows assigning more than 3 wheelbarrows to a stockpile
 
 fix-armory
 ----------
@@ -1377,12 +1424,12 @@ produce undesirable results. There are a few good ones though.
 
      You are in fort game mode, managing your fortress and paused.
      You switch to the arena game mode, *assume control of a creature* and then
-     switch to adventure game mode(1). 
+     switch to adventure game mode(1).
      You just lost a fortress and gained an adventurer.
      You could also do this.
      You are in fort game mode, managing your fortress and paused at the esc menu.
      You switch to the adventure game mode, then use Dfusion to *assume control of a creature* and then
-     save or retire. 
+     save or retire.
      You just created a returnable mountain home and gained an adventurer.
 
 
@@ -1420,12 +1467,15 @@ Export dwarves to RuneSmith-compatible XML.
 
 exportlegends
 -------------
-Exports data from legends mode; allowing a set-and-forget export of large worlds.  
+Controls legends mode to export data - especially useful to set-and-forget large
+worlds, or when you want a map of every site when there are several hundred.
 
 Options:
 
+:info: Exports the world/gen info and the legends XML
+:sites: Exports all available site maps
 :maps: Exports all seventeen detailed maps
-:all: first exports the world/gen info, then the XML, then all detailed maps
+:all: Equivalent to calling all of the above, in that order
 
 
 Job management
@@ -1530,7 +1580,7 @@ Usage:
    Delete all constraints.
 
 Function
-........
+~~~~~~~~
 
 When the plugin is enabled, it protects all repeat jobs from removal.
 If they do disappear due to any cause, they are immediately re-added to their
@@ -1546,7 +1596,7 @@ Check out the ``gui/workflow`` script below for a simple front-end integrated
 in the game UI.
 
 Constraint format
-.................
+~~~~~~~~~~~~~~~~~
 
 The contstraint spec consists of 4 parts, separated with '/' characters::
 
@@ -1575,20 +1625,20 @@ The subsequent parts are optional:
   be used to ignore imported items or items below a certain quality.
 
 Constraint examples
-...................
+~~~~~~~~~~~~~~~~~~~
 
 Keep metal bolts within 900-1000, and wood/bone within 150-200::
-    
+
     workflow amount AMMO:ITEM_AMMO_BOLTS/METAL 1000 100
     workflow amount AMMO:ITEM_AMMO_BOLTS/WOOD,BONE 200 50
 
 Keep the number of prepared food & drink stacks between 90 and 120::
-    
+
     workflow count FOOD 120 30
     workflow count DRINK 120 30
 
 Make sure there are always 25-30 empty bins/barrels/bags::
-    
+
     workflow count BIN 30
     workflow count BARREL 30
     workflow count BOX/CLOTH,SILK,YARN 30
@@ -1603,12 +1653,12 @@ Produce 15-20 gold crafts::
     workflow count CRAFTS//GOLD 20
 
 Collect 15-20 sand bags and clay boulders::
-    
+
     workflow count POWDER_MISC/SAND 20
     workflow count BOULDER/CLAY 20
 
 Make sure there are always 80-100 units of dimple dye::
-    
+
     workflow amount POWDER_MISC//MUSHROOM_CUP_DIMPLE:MILL 100 20
 
 .. note::
@@ -1626,10 +1676,31 @@ Fortress activity management
 
 seedwatch
 ---------
-Tool for turning cooking of seeds and plants on/off depending on how much you
-have of them.
+Watches the numbers of seeds available and enables/disables seed and plant cooking.
 
-See 'seedwatch help' for detailed description.
+Each plant type can be assigned a limit. If their number falls below that limit,
+the plants and seeds of that type will be excluded from cookery.
+If the number rises above the limit + 20, then cooking will be allowed.
+
+The plugin needs a fortress to be loaded and will deactivate automatically otherwise.
+You have to reactivate with 'seedwatch start' after you load the game.
+
+Options:
+
+:all:       Adds all plants from the abbreviation list to the watch list.
+:start:     Start watching.
+:stop:      Stop watching.
+:info:      Display whether seedwatch is watching, and the watch list.
+:clear:     Clears the watch list.
+
+Examples:
+
+``seedwatch MUSHROOM_HELMET_PLUMP 30``
+    add ``MUSHROOM_HELMET_PLUMP`` to the watch list, limit = 30
+``seedwatch MUSHROOM_HELMET_PLUMP``
+    removes ``MUSHROOM_HELMET_PLUMP`` from the watch list.
+``seedwatch all 30``
+    adds all plants from the abbreviation list to the watch list, the limit being 30.
 
 zone
 ----
@@ -1688,7 +1759,7 @@ Filters:
 :milkable:      Race is milkable. Negatable.
 
 Usage with single units
-.......................
+~~~~~~~~~~~~~~~~~~~~~~~
 
 One convenient way to use the zone tool is to bind the command 'zone assign' to
 a hotkey, maybe also the command 'zone set'. Place the in-game cursor over
@@ -1698,7 +1769,7 @@ and use 'zone assign' to assign them to their new home. Allows pitting your
 own dwarves, by the way.
 
 Usage with filters
-..................
+~~~~~~~~~~~~~~~~~~
 
 All filters can be used together with the 'assign' command.
 
@@ -1720,15 +1791,15 @@ are not properly added to your own stocks; slaughtering them should work).
 Most filters can be negated (e.g. 'not grazer' -> race is not a grazer).
 
 Mass-renaming
-.............
+~~~~~~~~~~~~~
 
 Using the 'nick' command you can set the same nickname for multiple units.
 If used without 'assign', 'all' or 'count' it will rename all units in the
 current default target zone. Combined with 'assign', 'all' or 'count' (and
-further optional filters) it will rename units matching the filter conditions. 
+further optional filters) it will rename units matching the filter conditions.
 
 Cage zones
-..........
+~~~~~~~~~~
 
 Using the 'tocages' command you can assign units to a set of cages, for example
 a room next to your butcher shop(s). They will be spread evenly among available
@@ -1740,7 +1811,7 @@ would make no sense, but can be used together with 'nick' or 'remnick' and all
 the usual filters.
 
 Examples
-........
+~~~~~~~~
 
 ``zone assign all own ALPACA minage 3 maxage 10``
    Assign all own alpacas who are between 3 and 10 years old to the selected
@@ -1762,7 +1833,7 @@ Examples
 ``zone tocages count 50 own tame male not grazer``
    Stuff up to 50 owned tame male animals who are not grazers into cages built
    on the current default zone.
-   
+
 autonestbox
 -----------
 Assigns unpastured female egg-layers to nestbox zones. Requires that you create
@@ -1843,17 +1914,17 @@ You want to keep max 7 kids (4 female, 3 male) and max 3 adults (2 female,
 slaughtered. Excess kids will get slaughtered starting with the youngest
 to allow that the older ones grow into adults. Any unnamed cats will
 be slaughtered as soon as possible.
-::  
+::
 
      autobutcher target 4 3 2 1 ALPACA BIRD_TURKEY
      autobutcher target 0 0 0 0 CAT
      autobutcher watch ALPACA BIRD_TURKEY CAT
      autobutcher start
-    
+
 Automatically put all new races onto the watchlist and mark unnamed tame units
 for slaughter as soon as they arrive in your fort. Settings already made
 for specific races will be left untouched.
-::  
+::
 
      autobutcher target 0 0 0 0 new
      autobutcher autowatch
@@ -1865,16 +1936,16 @@ values again. Note: 'autobutcher unwatch all' works, but only makes sense
 if you want to keep the plugin running with the 'autowatch' feature or manually
 add some new races with 'watch'. If you simply want to stop it completely use
 'autobutcher stop' instead.
-::  
+::
 
      autobutcher unwatch ALPACA CAT
-    
+
 **Note:**
 
 Settings and watchlist are stored in the savegame, so that you can have
 different settings for each world. If you want to copy your watchlist to
 another savegame you can use the command list_export:
-::  
+::
 
      Load savegame where you made the settings.
      Start a CMD shell and navigate to the df directory. Type the following into the shell:
@@ -1900,27 +1971,71 @@ If you add
 ::
 
       enable getplants
-      
+
 to your dfhack.init there will be a hotkey to open the dashboard from the chop designation
 menu.
 
 
 autolabor
 ---------
-Automatically manage dwarf labors.
-
-When enabled, autolabor periodically checks your dwarves and enables or
-disables labors. It tries to keep as many dwarves as possible busy but
+Automatically manage dwarf labors to efficiently complete jobs.
+Autolabor tries to keep as many dwarves as possible busy but
 also tries to have dwarves specialize in specific skills.
 
-.. note::
+The key is that, for almost all labors, once a dwarf begins a job it will finish that
+job even if the associated labor is removed. Autolabor therefore frequently checks
+which dwarf or dwarves should take new jobs for that labor, and sets labors accordingly.
+Labors with equiptment (mining, hunting, and woodcutting), which are abandoned
+if labors change mid-job, are handled slightly differently to minimise churn.
 
-    Warning: autolabor will override any manual changes you make to labors
-    while it is enabled.
-    
-    To prevent particular dwarves from being managed by autolabor, put them in any burrow.
+*Warning: autolabor will override any manual changes you make to labors*
+*while it is enabled, including through other tools such as Dwarf Therapist*
 
-For detailed usage information, see 'help autolabor'.
+Simple usage:
+
+:enable autolabor:      Enables the plugin with default settings.  (Persistent per fortress)
+:disable autolabor:     Disables the plugin.
+
+Anything beyond this is optional - autolabor works well on the default settings.
+
+Advanced usage:
+
+:`autolabor <labor> <minimum> [<maximum>]`: Set number of dwarves assigned to a labor.
+:`autolabor <labor> haulers`:               Set a labor to be handled by hauler dwarves.
+:`autolabor <labor> disable`:               Turn off autolabor for a specific labor.
+:`autolabor <labor> reset`:                 Return a labor to the default handling.
+:`autolabor reset-all`:                     Return all labors to the default handling.
+:`autolabor list`:                          List current status of all labors.
+:`autolabor status`:                        Show basic status information.
+
+*Examples:*
+
+:`autolabor MINE 5`:                        Keep at least 5 dwarves with mining enabled.
+:`autolabor CUT_GEM 1 1`:                   Keep exactly 1 dwarf with gemcutting enabled.
+:`autolabor COOK 1 1 3`:                    Keep 1 dwarf with cooking enabled, selected only from the top 3.
+:`autolabor FEED_WATER_CIVILIANS haulers`:  Have haulers feed and water wounded dwarves.
+:`autolabor CUTWOOD disable`:               Turn off autolabor for wood cutting.
+
+By default, each labor is assigned to between 1 and 200 dwarves (2-200 for mining).
+By default 33% of the workforce become haulers, who handle all hauling jobs as well
+as cleaning, pulling levers, recovering wounded, removing constructions, and filling ponds.
+Other jobs are automatically assigned as described above.  Each of these settings can be adjusted.
+
+Jobs are rarely assigned to nobles with responsibilities for meeting diplomats or merchants,
+never to the chief medical dwarf, and less often to the bookeeper and manager.
+
+Hunting is never assigned without a butchery, and fishing is nver assigned without a fishery.
+
+For each labor a preference order is calculated based on skill, biased against masters of other
+trades and excluding those who can't do the job.  The labor is then added to the best <minimum>
+dwarves for that labor.  We assign at least the minimum number of dwarfs, in order of preference,
+and then assign additional dwarfs that meet any of these conditions:
+
+    * The dwarf is idle and there are no idle dwarves assigned to this labor
+    * The dwarf has nonzero skill associated with the labor
+    * The labor is mining, hunting, or woodcutting and the dwarf currently has it enabled.
+
+We stop assigning dwarfs when we reach the maximum allowed.
 
 Other
 =====
@@ -1956,6 +2071,7 @@ Usage::
 Tools:
 
 * ``anywhere``: Allows embarking anywhere (including sites, mountain-only biomes, and oceans). Use with caution.
+* ``mouse``: Implements mouse controls (currently in the local embark region only)
 * ``nano``: An implementation of nano embark - allows resizing below 2x2 when enabled.
 * ``sand``: Displays an indicator when sand is present in the currently-selected area, similar to the default clay/stone indicators.
 * ``sticky``: Maintains the selected local area while navigating the world map
@@ -2003,7 +2119,7 @@ Known limitations: if the selected unit is currently performing a job, the mood 
 
 log-region
 ----------
-When enabled in dfhack.init, each time a fort is loaded identifying information will be written to the gamelog.  Assists in parsing the file if you switch between forts, and adds information for story-building. 
+When enabled in dfhack.init, each time a fort is loaded identifying information will be written to the gamelog.  Assists in parsing the file if you switch between forts, and adds information for story-building.
 
 
 =======
@@ -2085,6 +2201,18 @@ directory.
 
   A graphical interface for creating items.
 
+* gui/stockpiles
+
+  Load and save stockpile settings from the 'q' menu.
+  Usage:
+      gui/stockpiles -save       to save the current stockpile
+      gui/stockpiles -load       to load settings into the current stockpile
+      gui/stockpiles -dir <path> set the default directory to save settings into
+      gui/stockpiles -help       to see this message
+
+Don't forget to `enable stockpiles` and create the `stocksettings` directory in
+the DF folder before trying to use this plugin.
+
 binpatch
 ========
 
@@ -2130,7 +2258,7 @@ A script to designate an area for digging according to a plan in csv format.
 This script, inspired from quickfort, can designate an area for digging.
 Your plan should be stored in a .csv file like this::
 
-    # this is a comment 
+    # this is a comment
     d;d;u;d;d;skip this tile;d
     d;d;d;i
 
@@ -2149,8 +2277,8 @@ as an offset for the pattern: instead of starting at the cursor, it will start
 The script takes the plan filename, starting from the root df folder (where
 Dwarf Fortress.exe is found).
 
-drainaquifer
-============
+drain-aquifer
+=============
 Remove all 'aquifer' tag from the map blocks. Irreversible.
 
 deathcause
@@ -2161,7 +2289,7 @@ Also works when selecting units from the 'u'nitlist viewscreen.
 
 dfstatus
 ========
-Show a quick overview of critical stock quantities, including food, dirnks, wood, and various bars.  
+Show a quick overview of critical stock quantities, including food, dirnks, wood, and various bars.
 
 embark
 ======
@@ -2206,6 +2334,39 @@ To purify all elves on the map with fire (may have side-effects)::
 
     exterminate elve magma
 
+fortplan
+========
+Usage: fortplan [filename]
+
+Designates furniture for building according to a .csv file with 
+quickfort-style syntax. Companion to digfort.
+
+The first line of the file must contain the following:
+   
+   #build start(X; Y; <start location description>)
+
+...where X and Y are the offset from the top-left corner of the file's area
+where the in-game cursor should be located, and <start location description>
+is an optional description of where that is. You may also leave a description
+of the contents of the file itself following the closing parenthesis on the
+same line.
+
+The syntax of the file itself is similar to digfort or quickfort. At present,
+only buildings constructed of an item with the same name as the building
+are supported. All other characters are ignored. For example:
+
+    `,`,d,`,`
+    `,f,`,t,`
+    `,s,b,c,`
+
+This section of a file would designate for construction a door and some 
+furniture inside a bedroom: specifically, clockwise from top left, a cabinet,
+a table, a chair, a bed, and a statue.
+
+All of the building designation uses Planning Mode, so you do not need to
+have the items available to construct all the buildings when you run
+fortplan with the .csv file.
+
 growcrops
 =========
 Instantly grow seeds inside farming plots.
@@ -2218,6 +2379,20 @@ harvested. You can change the number with a 2nd argument.
 For example, to grow 40 plump helmet spawn::
 
     growcrops plump 40
+
+hfs-pit
+=======
+Creates a pit to the underworld at the cursor.
+
+Takes three arguments:  diameter of the pit in tiles, whether to wall off
+the pit, and whether to insert stairs.  If no arguments are given, the default
+is "hfs-pit 1 0 0", ie single-tile wide with no walls or stairs.
+
+    hfs-pit 4 0 1
+    hfs-pit 2 1 0
+
+First example is a four-across pit with stairs but no walls; second is a
+two-across pit with stairs but no walls.
 
 lever
 =====
@@ -2289,29 +2464,25 @@ Example::
 
     multicmd locate-ore iron ; digv
 
+position
+========
+Reports the current time:  date, clock time, month, and season.  Also reports
+location:  z-level, cursor position, window size, and mouse location.
+
+putontable
+==========
+Makes item appear on the table, like in adventure mode shops. Arguments:  '-a'
+or '--all' for all items.
+
 quicksave
 =========
 
 If called in dwarf mode, makes DF immediately auto-save the game by setting a flag
 normally used in seasonal auto-save.
 
-removebadthoughts
-=================
-This script remove negative thoughts from your dwarves. Very useful against
-tantrum spirals.
-
-The script can target a single creature, when used with the ``him`` argument,
-or the whole fort population, with ``all``.
-
-To show every bad thought present without actually removing them, run the
-script with the ``-n`` or ``--dry-run`` argument. This can give a quick
-hint on what bothers your dwarves the most.
-
-Individual dwarf happiness may not increase right after this command is run,
-but in the short term your dwarves will get much more joyful.
-
-Internals: the thoughts are set to be very old, so that the game remove them
-quickly after you unpause.
+remove-stress
+=============
+Sets stress to -1,000,000; the normal range is 0 to 500,000 with very stable or very stressed dwarves taking on negative or greater values respectively.  Applies to the selected unit, or use "remove-stress -all" to apply to all units.
 
 setfps
 ======
@@ -2404,12 +2575,9 @@ Teleports a unit to given coordinates.
 
 Examples::
 
-    teleport showunitid                 - prints unitid beneath cursor
-    teleport showpos                    - prints coordinates beneath cursor
-    teleport unit 1234 x 56 y 115 z 26  - teleports unit 1234 to 56,115,26
-
-One or both of ``unit`` and ``x``/``y``/``z`` coordinate positions must be 
-specified.  If one is omitted, the unit or position beneath the cursor is used.
+    teleport -showunitid                 - prints unitid beneath cursor
+    teleport -showpos                    - prints coordinates beneath cursor
+    teleport -unit 1234 -x 56 -y 115 -z 26  - teleports unit 1234 to 56,115,26
 
 undump-buildings
 ================
@@ -2522,8 +2690,8 @@ To activate, open the unit screen and press 'l'.
 
 This tool implements a Dwarf Therapist-like interface within the game UI. The
 far left column displays the unit's Happiness (color-coded based on its
-value), Name, Profession/Squad, and the right half of the screen displays each 
-dwarf's labor settings and skill levels (0-9 for Dabbling thru Professional, A-E for 
+value), Name, Profession/Squad, and the right half of the screen displays each
+dwarf's labor settings and skill levels (0-9 for Dabbling thru Professional, A-E for
 Great thru Grand Master, and U-Z for Legendary thru Legendary+5).
 
 Cells with teal backgrounds denote skills not controlled by labors, e.g.
@@ -2546,7 +2714,7 @@ Press Enter to toggle the selected labor for the selected unit, or Shift+Enter
 to toggle all labors within the selected category.
 
 Press the ``+-`` keys to sort the unit list according to the currently selected
-skill/labor, and press the ``*/`` keys to sort the unit list by Name, Profession/Squad, 
+skill/labor, and press the ``*/`` keys to sort the unit list by Name, Profession/Squad,
 Happiness, or Arrival order (using Tab to select which sort method to use here).
 
 With a unit selected, you can press the "v" key to view its properties (and
@@ -2648,19 +2816,34 @@ enabled materials, you should be able to place complex constructions more conven
 
 Stockpile Automation
 ====================
-Enable the automelt plugin in your dfhack.init with::
+Enable the automelt or autotrade plugins in your dfhack.init with::
 
     enable automelt
+    enable autotrade
 
-When querying a stockpile an option will appear to toggle automelt for this stockpile.
-Any items placed in this stockpile will be designated to be melted.
+When querying a stockpile, options will appear to toggle automelt and/or autotrade for this stockpile.
+When automelt is enabled for a stockpile, any meltable items placed in it will be designated to be melted.
+When autotrade is enabled for a stockpile, any items placed in it will be designated to be taken to the Trade Depot whenever merchants are on the map.
 
+Track Stop Menu
+===============
+
+The `q` menu of track stops is completely blank by default.  To enable one::
+
+    enable trackstop
+
+This allows you to view and/or change the track stop's friction and dump direction settings.
+It re-uses the keybindings from the track stop building interface:
+
+* BUILDING_TRACK_STOP_FRICTION_UP
+* BUILDING_TRACK_STOP_FRICTION_DOWN
+* BUILDING_TRACK_STOP_DUMP
 
 gui/advfort
 ===========
 
 This script allows to perform jobs in adventure mode. For more complete help
-press '?' while script is running. It's most confortable to use this as a 
+press '?' while script is running. It's most confortable to use this as a
 keybinding. (e.g. keybinding set Ctrl-T gui/advfort). Possible arguments:
 
 * -a or --nodfassign - uses different method to assign items.
@@ -2669,7 +2852,7 @@ keybinding. (e.g. keybinding set Ctrl-T gui/advfort). Possible arguments:
 
 * -c or --cheat - relaxes item requirements for buildings (e.g. walls from bones).
   implies -a
-  
+
 * job - selects that job (e.g. Dig or FellTree)
 
 An example of player digging in adventure mode:
@@ -2735,7 +2918,7 @@ and selects the newly created copy.
 gui/companion-order
 ===================
 
-A script to issue orders for companions. Select companions with lower case chars, issue orders with upper 
+A script to issue orders for companions. Select companions with lower case chars, issue orders with upper
 case. Must be in look or talk mode to issue command on tile.
 
 .. image:: images/companion-order.png
@@ -2759,13 +2942,13 @@ There are three ways to open this editor:
 
 * using gui/gm-editor <lua command> - executes lua command and opens editor on
   its results (e.g. gui/gm-editor "df.global.world.items.all" shows all items)
-  
+
 * using gui/gm-editor dialog - shows an in game dialog to input lua command. Works
   the same as version above.
-  
+
 .. image:: images/gm-editor.png
 
-This editor allows to change and modify almost anything in df. Press '?' for an 
+This editor allows to change and modify almost anything in df. Press '?' for an
 in-game help.
 
 Hotkeys
@@ -2779,6 +2962,36 @@ Type ``hotkeys`` into the DFHack console to open the screen, or bind the command
 globally active hotkey in dfhack.init, e.g.::
 
     keybinding add Ctrl-F1 hotkeys
+
+Hotkeys
+=======
+
+Opens an in-game screen showing DFHack keybindings that are valid in the current mode.
+
+.. image:: images/hotkeys.png
+
+Type ``hotkeys`` into the DFHack console to open the screen, or bind the command to a
+globally active hotkey in dfhack.init, e.g.:
+
+ ``keybinding add Ctrl-F1 hotkeys``
+
+
+Stockpile Automation
+====================
+Enable the autodump plugin in your dfhack.init with
+ ``enable autodump``
+
+When querying a stockpile an option will appear to toggle autodump for this stockpile.
+Any items placed in this stockpile will be designated to be dumped.
+
+Stockpile Automation
+====================
+Enable the automelt plugin in your dfhack.init with
+ ``enable automelt``
+
+When querying a stockpile an option will appear to toggle automelt for this stockpile.
+Any items placed in this stockpile will be designated to be melted.
+
 
 gui/liquids
 ===========

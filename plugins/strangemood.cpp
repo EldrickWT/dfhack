@@ -32,14 +32,16 @@ using std::vector;
 using namespace DFHack;
 using namespace df::enums;
 
-using df::global::world;
-using df::global::ui;
-using df::global::d_init;
-using df::global::created_item_count;
-using df::global::created_item_type;
-using df::global::created_item_subtype;
-using df::global::created_item_mattype;
-using df::global::created_item_matindex;
+DFHACK_PLUGIN("strangemood");
+
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
+REQUIRE_GLOBAL(d_init);
+REQUIRE_GLOBAL(created_item_count);
+REQUIRE_GLOBAL(created_item_type);
+REQUIRE_GLOBAL(created_item_subtype);
+REQUIRE_GLOBAL(created_item_mattype);
+REQUIRE_GLOBAL(created_item_matindex);
 using df::global::debug_nomoods;
 
 Random::MersenneRNG rng;
@@ -474,7 +476,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
         out.printerr("ARTIFACTS are not enabled!\n");
         return CR_FAILURE;
     }
-    if (*debug_nomoods)
+    if (debug_nomoods && *debug_nomoods)
     {
         out.printerr("Strange moods disabled via debug flag!\n");
         return CR_FAILURE;
@@ -631,7 +633,11 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     // If no mood type was specified, pick one randomly
     if (type == mood_type::None)
     {
-        if (rng.df_trandom(100) > unit->status.happiness)
+        if (soul && (
+            (soul->personality.stress_level >= 500000) ||
+            (soul->personality.stress_level >= 250000 && !rng.df_trandom(2)) ||
+            (soul->personality.stress_level >= 100000 && !rng.df_trandom(10))
+            ))
         {
             switch (rng.df_trandom(2))
             {
@@ -691,7 +697,6 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     unit->relations.mood_copy = unit->mood;
     Gui::showAutoAnnouncement(announcement_type::STRANGE_MOOD, unit->pos, msg, color, bright);
     
-    unit->status.happiness = 100;
     // TODO: make sure unit drops any wrestle items
     unit->job.mood_timeout = 50000;
     unit->flags1.bits.has_mood = true;
@@ -1144,7 +1149,7 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
         {
             if ((job->job_type == job_type::StrangeMoodBrooding) && (rng.df_trandom(2)))
             {
-                switch (rng.df_trandom(3))
+                switch (rng.df_trandom(2))
                 {
                 case 0:
                     job->job_items.push_back(item = new df::job_item());
@@ -1158,10 +1163,6 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
                     item->flags2.bits.bone = true;
                     item->flags2.bits.body_part = true;
                     item->quantity = 1;
-                    break;
-                case 2:
-                    // in older versions, they would request additional skulls
-                    // in 0.34.11, the request becomes "nothing"
                     break;
                 }
             }
@@ -1302,8 +1303,6 @@ command_result df_strangemood (color_ostream &out, vector <string> & parameters)
     unit->unk_18e = 0;
     return CR_OK;
 }
-
-DFHACK_PLUGIN("strangemood");
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
 {

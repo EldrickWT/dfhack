@@ -1,10 +1,146 @@
-DFHack future
+DFHack 0.40.23-r1
+    Internals
+        plugins will not be loaded if globals they specify as required are not located (should prevent some crashes)
+    Fixes
+        Fixed numerous (mostly Lua-related) crashes on OS X by including a more up-to-date libstdc++
+        Alt should no longer get stuck on Windows (and perhaps other platforms as well)
+        advfort works again
+        autobutcher takes sexualities into account
+        devel/export-dt-ini: Updated for 0.40.20+
+        digfort: now checks file type and existence
+        exportlegends: Fixed map export
+        full-heal: Fixed a problem with selecting units in the GUI
+        gui/hack-wish: Fixed restrictive material filters
+        mousequery: Changed box-select key to Alt+M
+        plugins/dwarfmonitor: correct date display (month index, separator)
+        scripts/putontable: added to the readme
+        siren should work again
+        stderr.log: removed excessive debug output on OS X
+        trackstop: No longer prevents cancelling the removal of a track stop or roller.
+        Fixed a display issue with PRINT_MODE:TEXT
+        Fixed a symbol error (MapExtras::BiomeInfo::MAX_LAYERS) when compiling DFHack in Debug mode
+    New Plugins
+    	fortplan: designate construction of (limited) buildings from .csv file, quickfort-style
+    New Scripts
+        gui/stockpiles: an in-game interface for saving and loading stockpile
+          settings files.
+        position: Reports the current date, time, month, and season, plus
+            some location info.  Port/update of position.py
+        hfs-pit: Digs a hole to hell under the cursor.  Replaces needs_porting/hellhole.cpp
+    Removed
+        embark.lua: Obsolete, use `embark-tools`
+    New tweaks:
+        eggs-fertile: Displays an egg fertility indicator on nestboxes
+        max-wheelbarrow: Allows assigning more than 3 wheelbarrows to a stockpile
+    Misc Improvements
+        embark-tools: Added basic mouse support on the local map
+        Made some adventure mode keybindings in dfhack.init-example only work in adventure mode
+        Added a default keybinding for "gui/companion-order"
+        further work on needs_porting
+
+DFHack 0.40.19-r1
+    Internals:
+    Fixes:
+        typo fix in modtools/reaction-trigger
+        modtools/item-trigger should now work with item types
+    New plugins:
+        savestock and loadstock: two commands for saving and loading
+          stockpile settings to a file. They can be used to migrate stockpile
+          settings between worlds and saves.
+    New scripts:
+        remove-stress [all]: set selected or all units unit to -1,000,000 stress
+          this script replaces removebadthoughts.rb
+    Misc improvements:
+        cmd-prompt can now access selected items, units, and buildings
+        autolabor plugin: add an optional talent pool parameter
+
+DFHack 0.40.16-r1
+    Internals:
+        EventManager should handle INTERACTION triggers a little better. It still can get confused about who did what but only rarely.
+        EventManager should no longer trigger REPORT events for old reports after loading a save.
+        lua/persist-table.lua: a convenient way of using persistent tables of arbitrary structure and dimension in Lua
+    Fixes:
+        mousequery: Disabled when linking levers
+        stocks: Melting should work now
+        scripts/full-heal: Updated with proper argument handling.
+        scripts/modtools/reaction-trigger-transition.lua
+            should produce the correct syntax now
+        scripts/superdwarf.rb should work better now
+        scripts/forum-dwarves.lua
+            update for new df-structures changes
+    New scripts:
+        scripts/
+            adaptation.rb
+                view or set the cavern adaptation level of your citizens
+            add-thought.lua
+                allows the user to add thoughts to creatures.
+            gaydar.lua
+                detect the sexual orientation of units on the map
+            markdown.lua
+                Save a copy of a text screen in markdown (for reddit among others).
+            devel/
+                all-bob.lua: renames everyone Bob to help test interaction-trigger
+    Misc improvements:
+        autodump:
+            Can now mark a stockpile for auto-dumping (similar to
+            automelt and autotrade)
+        buildingplan:
+            Can now auto-allocate rooms to dwarves with specific positions
+            (e.g. expedition leader, mayor)
+        dwarfmonitor
+            Now displays a weather indicator and date
+        lua/syndrome-util.lua
+            now you can remove syndromes by SYN_CLASS
+        scripts/modtools/add-syndrome.lua
+            now you can remove syndromes by SYN_CLASS
+        No longer writes empty .history files
+
+DFHack 0.40.15-r1
+    Fixes:
+        - mousequery: Fixed behavior when selecting a tile on the lowest z-level
+    Internals:
+        - EventManager: deals with frame_counter getting reset properly now.
+        - modtools/item-trigger: fixed equip/unequip bug and corrected minor documentation error
+        - teleport: Updated with proper argument handling and proper unit-at-destination handling.
+        - autotrade: Removed the newly obsolete "Mark all" functionality.
+        - search: Adapts to the new trade screen column width
+        - tweak fast-trade: Switching the fast-trade keybinding to Shift-Up/Shift-Down, due to Select All conflict
+
+DFHack 0.40.14-r1
+    Internals:
+        - The DFHack console can now be disabled by setting the DFHACK_DISABLE_CONSOLE
+            environment variable: "DFHACK_DISABLE_CONSOLE=1 ./dfhack"
+    Fixes:
+        - Stopped duplicate load/unload events when unloading a world
+        - Stopped "-e" from being echoed when DFHack quits on Linux
+        - automelt now uses a faster method to locate items
+        - autotrade: "Mark all" no longer double-marks bin contents
+        - drainaquifer.rb: replaced with a faster less buggy drain-aquifer.lua
+        - embark-tools no longer conflicts with keys on the notes screen
+        - fastdwarf: Fixed problems with combat/attacks
+        - forum-dwarves should work now
+        - manipulator now uses a stable sort, allowing sorting by multiple categories
+        - rendermax updated to work with 0.40
+    New plugins:
+        - trackstop: Shows track stop friction and dump direction in its 'q' menu
+    New tweaks:
+        - farm-plot-select: Adds "Select all" and "Deselect all" options to farm plot menus
+        - import-priority-category: Allows changing the priority of all goods in a
+            category when discussing an import agreement with the liaison
+        - manager-quantity: Removes the limit of 30 jobs per manager order
+        - civ-view-agreement: Fixes overlapping text on the "view agreement" screen
+        - nestbox-color: Fixes the color of built nestboxes
+
+    Misc Improvements:
+        - exportlegends.lua can now handle site maps
 
 DFHack 0.40.13-r1
     Internals:
         - unified spatter structs
+        - added ruby df.print_color(color, string) method for dfhack console
     Fixes:
         - no more -e after terminating
+        - fixed superdwarf
 
 DFHack 0.40.12-r1
     Fixes:
@@ -176,9 +312,9 @@ DFHack v0.34.11-r5
 
   New plugins:
     - rendermax: replace the renderer with something else. Most interesting is "rendermax light"- a lighting engine for df.
-    - stockflow (by eswald): queues manager jobs of the configured type based on the state of a stockpile.
+    - automelt: allows marking stockpiles for automelt (i.e. any items placed in stocpile will be designated for melting)
     - embark-tools: implementations of Embark Anywhere, Nano Embark, and a few other embark-related utilities
-    - building-hacks: Allows to add custom functionality and/or animations to buildings. 
+    - building-hacks: Allows to add custom functionality and/or animations to buildings.
     - petcapRemover: triggers pregnancies in creatures so that you can effectively raise the default pet population cap from the default 50
 
   Misc improvements:

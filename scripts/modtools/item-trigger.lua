@@ -98,7 +98,7 @@ function equipHandler(unit, item, isEquip)
  local table = {}
  table.mode = mode
  table.item = df.item.find(item)
- table.unit = unit
+ table.unit = df.unit.find(unit)
  handler(table)
 end
 
@@ -201,7 +201,7 @@ arguments:
             \\CONTAMINANT_MATERIAL_INDEX
             \\MODE
             \\UNIT_ID
-            \\anything -> anything
+            \\anything -> \anything
             anything -> anything
 ]])
  return
@@ -238,7 +238,7 @@ if args.itemType then
  local temp
  for _,itemdef in ipairs(df.global.world.raws.itemdefs.all) do
   if itemdef.id == args.itemType then
-   temp = itemdef.subtype
+   temp = args.itemType --itemdef.subtype
    break
   end
  end

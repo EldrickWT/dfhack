@@ -43,12 +43,15 @@
 
 using std::deque;
 
-using df::global::world;
-using df::global::ui;
+DFHACK_PLUGIN("dwarfmonitor");
+DFHACK_PLUGIN_IS_ENABLED(is_enabled);
+REQUIRE_GLOBAL(current_weather);
+REQUIRE_GLOBAL(world);
+REQUIRE_GLOBAL(ui);
 
 typedef int16_t activity_type;
 
-#define PLUGIN_VERSION 0.8
+#define PLUGIN_VERSION 0.9
 #define DAY_TICKS 1200
 #define DELTA_TICKS 100
 
@@ -66,12 +69,13 @@ struct less_second {
 
 static bool monitor_jobs = false;
 static bool monitor_misery = true;
+static bool monitor_date = true;
 static map<df::unit *, deque<activity_type>> work_history;
 
 static int misery[] = { 0, 0, 0, 0, 0, 0, 0 };
 static bool misery_upto_date = false;
 
-static color_value monitor_colors[] = 
+static color_value monitor_colors[] =
 {
     COLOR_LIGHTRED,
     COLOR_RED,
@@ -84,20 +88,20 @@ static color_value monitor_colors[] =
 
 static int get_happiness_cat(df::unit *unit)
 {
-    int happy = unit->status.happiness;
-    if (happy == 0)         // miserable
+    int stress = unit->status.current_soul->personality.stress_level;
+    if (stress >= 500000)
         return 0;
-    else if (happy <= 25)   // very unhappy
+    else if (stress >= 250000)
         return 1;
-    else if (happy <= 50)   // unhappy
+    else if (stress >= 100000)
         return 2;
-    else if (happy <= 75)   // fine
+    else if (stress >= 60000)
         return 3;
-    else if (happy <= 125)  // quite content
+    else if (stress >= 30000)
         return 4;
-    else if (happy <= 150)  // happy
+    else if (stress >= 0)
         return 5;
-    else                    // ecstatic
+    else
         return 6;
 }
 
@@ -688,7 +692,7 @@ public:
                     case job_type::FertilizeField:
                         real_activity = JOB_AGRICULTURE;
                         break;
-                        
+
                     case job_type::ButcherAnimal:
                     case job_type::PrepareRawFish:
                     case job_type::MillPlants:
@@ -913,7 +917,7 @@ public:
                 populateDwarfColumn();
                 populateCategoryBreakdownColumn();
             }
-            
+
             return;
         }
 
@@ -1015,7 +1019,7 @@ private:
     map<activity_type, map<df::unit *, size_t>> dwarf_activity_values;
     size_t fort_activity_count;
     size_t window_days;
-    
+
     vector<activity_type> listed_activities;
 
     void validateColumn()
@@ -1227,7 +1231,7 @@ public:
             if (!unit->status.current_soul)
                 continue;
 
-            for (auto it = unit->status.current_soul->preferences.begin(); 
+            for (auto it = unit->status.current_soul->preferences.begin();
                  it != unit->status.current_soul->preferences.end();
                  it++)
             {
@@ -1639,7 +1643,7 @@ static void update_dwarf_stats(bool is_paused)
             add_work_history(unit, JOB_LEISURE);
             continue;
         }
-         
+
         add_work_history(unit, unit->job.current_job->job_type);
     }
 }
@@ -1654,7 +1658,7 @@ DFhackCExport command_result plugin_onupdate (color_ostream &out)
         return CR_OK;
 
     static decltype(world->frame_counter) last_frame_count = 0;
-    
+
     bool is_paused = DFHack::World::ReadPauseState();
     if (is_paused)
     {
@@ -1689,24 +1693,82 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
     {
         INTERPOSE_NEXT(render)();
 
-        if (monitor_misery && Maps::IsValid())
+        if (Maps::IsValid())
         {
-            string entries[7];
-            size_t length = 9;
-            for (int i = 0; i < 7; i++)
+            if (monitor_misery)
             {
-                entries[i] = int_to_string(misery[i]);
-                length += entries[i].length();
+                string entries[7];
+                size_t length = 9;
+                for (int i = 0; i < 7; i++)
+                {
+                    entries[i] = int_to_string(misery[i]);
+                    length += entries[i].length();
+                }
+
+                int x = gps->dimx - length;
+                int y = gps->dimy - 1;
+                OutputString(COLOR_WHITE, x, y, "H:");
+                for (int i = 0; i < 7; i++)
+                {
+                    OutputString(monitor_colors[i], x, y, entries[i]);
+                    if (i < 6)
+                        OutputString(COLOR_WHITE, x, y, "/");
+                }
             }
 
-            int x = gps->dimx - length;
-            int y = gps->dimy - 1;
-            OutputString(COLOR_WHITE, x, y, "H:");
-            for (int i = 0; i < 7; i++)
+            if (monitor_date)
             {
-                OutputString(monitor_colors[i], x, y, entries[i]);
-                if (i < 6)
-                    OutputString(COLOR_WHITE, x, y, "/");
+                int x = gps->dimx - 30;
+                int y = 0;
+
+                ostringstream date_str;
+                auto month = World::ReadCurrentMonth() + 1;
+                auto day = World::ReadCurrentDay();
+                date_str << "Date:" << World::ReadCurrentYear() << "-" << 
+                    ((month < 10) ? "0" : "") << month << "-" << 
+                    ((day < 10) ? "0" : "") << day;
+
+                OutputString(COLOR_GREY, x, y, date_str.str());
+
+                x = 1;
+                y = gps->dimy - 1;
+                bool clear = false,
+                     rain = false,
+                     snow = false;
+                if (current_weather)
+                {
+                    int i, j;
+                    for (i = 0; i < 5; ++i)
+                    {
+                        for (j = 0; j < 5; ++j)
+                        {
+                            switch ((*current_weather)[i][j])
+                            {
+                                case weather_type::None:
+                                    clear = true;
+                                    break;
+                                case weather_type::Rain:
+                                    rain = true;
+                                    break;
+                                case weather_type::Snow:
+                                    snow = true;
+                                    break;
+                            }
+                        }
+                    }
+                }
+                if (clear && (rain || snow))
+                {
+                    OutputString(COLOR_YELLOW, x, y, "Clear");
+                    ++x;
+                }
+                if (rain)
+                {
+                    OutputString(COLOR_LIGHTBLUE, x, y, "Rain");
+                    ++x;
+                }
+                if (snow)
+                    OutputString(COLOR_WHITE, x, y, "Snow");
             }
         }
     }
@@ -1714,9 +1776,6 @@ struct dwarf_monitor_hook : public df::viewscreen_dwarfmodest
 
 IMPLEMENT_VMETHOD_INTERPOSE(dwarf_monitor_hook, feed);
 IMPLEMENT_VMETHOD_INTERPOSE(dwarf_monitor_hook, render);
-
-DFHACK_PLUGIN("dwarfmonitor");
-DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 static bool set_monitoring_mode(const string &mode, const bool &state)
 {
@@ -1732,11 +1791,15 @@ static bool set_monitoring_mode(const string &mode, const bool &state)
         if (!monitor_jobs)
             reset();
     }
-
-    if (mode == "misery" || mode == "all")
+    else if (mode == "misery" || mode == "all")
     {
         mode_recognized = true;
         monitor_misery = state;
+    }
+    else if (mode == "date" || mode == "all")
+    {
+        mode_recognized = true;
+        monitor_date = state;
     }
 
     return mode_recognized;
@@ -1841,11 +1904,11 @@ DFhackCExport command_result plugin_init(color_ostream &out, std::vector <Plugin
     activity_labels[JOB_MECHANICAL]         = "Mechanics";
     activity_labels[JOB_ANIMALS]            = "Animal Handling";
     activity_labels[JOB_PRODUCTIVE]         = "Other Productive";
-    
+
     commands.push_back(
         PluginCommand(
         "dwarfmonitor", "Records dwarf activity to measure fort efficiency",
-        dwarfmonitor_cmd, false, 
+        dwarfmonitor_cmd, false,
         "dwarfmonitor enable <mode>\n"
         "  Start monitoring <mode>\n"
         "    <mode> can be \"work\", \"misery\", or \"all\"\n"
