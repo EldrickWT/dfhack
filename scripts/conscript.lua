@@ -62,7 +62,7 @@ Fishing
 
 Fishing - Intelligent Pets/Slaves will Fish. This can be problematic if they can't then
     DROP them anywhere. They also may fish the map empty. Thus have a care if you enable
-    Fishing as Pet/slaves who can will Fish. Conversely, it can free other units for
+    Fishing as Pet/slaves who can _will Fish_. Conversely, it can free other units for
     other endeavors... provided you keep the other units from heading to the
     watering hole. It is unknown if Toady One will ever patch away Intelligent Pet
     fishing... as it can keep them from starving.
@@ -268,11 +268,11 @@ for _,v in ipairs(df.global.world.units.active) do
             v.status.labors.PULL_LEVER = true
             v.status.labors.REMOVE_CONSTRUCTION = true
             v.status.labors.HAUL_WATER = true
+            v.status.labors.GELD = true
+            v.status.labors.BUILD_ROAD = true
+            v.status.labors.BUILD_CONSTRUCTION = true
         end
-        --/Old/ code for checking for mysterious extra labors.
-        if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[78] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.78") end
-        if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[79] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.79") end
-        if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[80] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.80") end
+        --/Old/ code for checking for mysterious extra labors. UPDATE: Spotted Geld, And the Two new Build Jobs. So not so old eh?
         if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[81] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.81") end
         if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[82] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.82") end
         if (v.civ_id == df.global.ui.civ_id) and not (v.status.labors[83] == false) then print(dfhack.TranslateName(v.name,true).." has a true value for status.labors.83") end
