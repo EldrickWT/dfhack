@@ -68,12 +68,15 @@ using namespace std;
 #include <df/creature_raw.h>
 #include <df/caste_raw.h>
 #include "df/unit_soul.h"
+#include "df/unit_wound.h"
 #include "df/viewscreen_dwarfmodest.h"
 #include "modules/Translation.h"
 
 using std::vector;
 using std::string;
 using namespace DFHack;
+using namespace DFHack::Units;
+using namespace DFHack::Buildings;
 using namespace df::enums;
 
 DFHACK_PLUGIN("zone");
@@ -338,25 +341,12 @@ DFhackCExport command_result plugin_onupdate ( color_ostream &out )
 // Various small tool functions
 // probably many of these should be moved to Unit.h and Building.h sometime later...
 
-int32_t getUnitAge(df::unit* unit);
 bool isTame(df::unit* unit);
 bool isTrained(df::unit* unit);
-bool isWar(df::unit* unit);
-bool isHunter(df::unit* unit);
-bool isOwnCiv(df::unit* unit);
-bool isMerchant(df::unit* unit);
-bool isForest(df::unit* unit);
 bool isGay(df::unit* unit);
 
-bool isActivityZone(df::building * building);
-bool isPenPasture(df::building * building);
-bool isPitPond(df::building * building);
-bool isActive(df::building * building);
-
-int32_t findBuildingIndexById(int32_t id);
-int32_t findPenPitAtCursor();
-int32_t findCageAtCursor();
-int32_t findChainAtCursor();
+df::building* findCageAtCursor();
+df::building* findChainAtCursor();
 
 df::general_ref_building_civzone_assignedst * createCivzoneRef();
 bool unassignUnitFromBuilding(df::unit* unit);
@@ -368,22 +358,6 @@ void chainInfo(color_ostream & out, df::building* building, bool verbose);
 bool isBuiltCageAtPos(df::coord pos);
 bool isInBuiltCageRoom(df::unit*);
 bool isNaked(df::unit *);
-bool isTamable(df::unit *);
-
-int32_t getUnitAge(df::unit* unit)
-{
-    // If the birthday this year has not yet passed, subtract one year.
-    // ASSUMPTION: birth_time is on the same scale as cur_year_tick
-    int32_t yearDifference = *cur_year - unit->relations.birth_year;
-    if (unit->relations.birth_time >= *cur_year_tick)
-        yearDifference--;
-    return yearDifference;
-}
-
-bool isDead(df::unit* unit)
-{
-    return unit->flags1.bits.dead;
-}
 
 // ignore vampires, they should be treated like normal dwarves
 bool isUndead(df::unit* unit)
@@ -391,21 +365,6 @@ bool isUndead(df::unit* unit)
     return (unit->flags3.bits.ghostly ||
             ( (unit->curse.add_tags1.bits.OPPOSED_TO_LIFE || unit->curse.add_tags1.bits.NOT_LIVING)
              && !unit->curse.add_tags1.bits.BLOODSUCKER ));
-}
-
-bool isMerchant(df::unit* unit)
-{
-    return unit->flags1.bits.merchant;
-}
-
-bool isForest(df::unit* unit)
-{
-    return unit->flags1.bits.forest;
-}
-
-bool isMarkedForSlaughter(df::unit* unit)
-{
-    return unit->flags2.bits.slaughter;
 }
 
 void doMarkForSlaughter(df::unit* unit)
@@ -487,195 +446,6 @@ bool isTrained(df::unit* unit)
     return trained;
 }
 
-// check for profession "war creature"
-bool isWar(df::unit* unit)
-{
-    if(   unit->profession  == df::profession::TRAINED_WAR
-       || unit->profession2 == df::profession::TRAINED_WAR)
-        return true;
-    else
-        return false;
-}
-
-// check for profession "hunting creature"
-bool isHunter(df::unit* unit)
-{
-    if(   unit->profession  == df::profession::TRAINED_HUNTER
-       || unit->profession2 == df::profession::TRAINED_HUNTER)
-        return true;
-    else
-        return false;
-}
-
-// check if unit is marked as available for adoption
-bool isAvailableForAdoption(df::unit* unit)
-{
-    auto refs = unit->specific_refs;
-    for(int i=0; i<refs.size(); i++)
-    {
-        auto ref = refs[i];
-        auto reftype = ref->type;
-        if( reftype == df::specific_ref_type::PETINFO_PET )
-        {
-            //df::pet_info* pet = ref->pet;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// check if creature belongs to the player's civilization
-// (don't try to pasture/slaughter random untame animals)
-bool isOwnCiv(df::unit* unit)
-{
-    return unit->civ_id == ui->civ_id;
-}
-
-// check if creature belongs to the player's race
-// (in combination with check for civ helps to filter out own dwarves)
-bool isOwnRace(df::unit* unit)
-{
-    return unit->race == ui->race_id;
-}
-
-// get race name by id or unit pointer
-// todo: rename these two functions to "getRaceToken" since the output is more of a token
-string getRaceName(int32_t id)
-{
-    df::creature_raw *raw = world->raws.creatures.all[id];
-    return raw->creature_id;
-}
-string getRaceName(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    return raw->creature_id;
-}
-
-// get plural of race name (used for display in autobutcher UI and for sorting the watchlist)
-string getRaceNamePlural(int32_t id)
-{
-    //WatchedRace * w = watched_races[idx];
-    df::creature_raw *raw = world->raws.creatures.all[id];
-    return raw->name[1]; // second field is plural of race name
-}
-
-string getRaceBabyName(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    return raw->general_baby_name[0];
-}
-string getRaceChildName(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    return raw->general_child_name[0];
-}
-
-bool isBaby(df::unit* unit)
-{
-    return unit->profession == df::profession::BABY;
-}
-
-bool isChild(df::unit* unit)
-{
-    return unit->profession == df::profession::CHILD;
-}
-
-bool isAdult(df::unit* unit)
-{
-    return !isBaby(unit) && !isChild(unit);
-}
-
-bool isEggLayer(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(   caste->flags.is_set(caste_raw_flags::LAYS_EGGS)
-            || caste->flags.is_set(caste_raw_flags::LAYS_UNUSUAL_EGGS))
-            return true;
-    }
-    return false;
-}
-
-bool isGrazer(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(caste->flags.is_set(caste_raw_flags::GRAZER))
-            return true;
-    }
-    return false;
-}
-
-bool isMilkable(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(caste->flags.is_set(caste_raw_flags::MILKABLE))
-            return true;
-    }
-    return false;
-}
-
-bool isTrainableWar(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(caste->flags.is_set(caste_raw_flags::TRAINABLE_WAR))
-            return true;
-    }
-    return false;
-}
-
-bool isTrainableHunting(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(caste->flags.is_set(caste_raw_flags::TRAINABLE_HUNTING))
-            return true;
-    }
-    return false;
-}
-
-bool isTamable(df::unit* unit)
-{
-    df::creature_raw *raw = world->raws.creatures.all[unit->race];
-    size_t sizecas = raw->caste.size();
-    for (size_t j = 0; j < sizecas;j++)
-    {
-        df::caste_raw *caste = raw->caste[j];
-        if(caste->flags.is_set(caste_raw_flags::PET) ||
-            caste->flags.is_set(caste_raw_flags::PET_EXOTIC))
-            return true;
-    }
-    return false;
-}
-
-bool isMale(df::unit* unit)
-{
-    return unit->sex == 1;
-}
-
-bool isFemale(df::unit* unit)
-{
-    return unit->sex == 0;
-}
-
 // found a unit with weird position values on one of my maps (negative and in the thousands)
 // it didn't appear in the animal stocks screen, but looked completely fine otherwise (alive, tame, own, etc)
 // maybe a rare bug, but better avoid assigning such units to zones or slaughter etc.
@@ -695,23 +465,26 @@ bool isNaked(df::unit* unit)
     return (unit->inventory.empty());
 }
 
-
-int getUnitIndexFromId(df::unit* unit_)
-{
-    for (size_t i=0; i < world->units.all.size(); i++)
-    {
-        df::unit* unit = world->units.all[i];
-        if(unit->id == unit_->id)
-            return i;
-    }
-    return -1;
-}
-
 bool isGay(df::unit* unit)
 {
     df::orientation_flags orientation = unit->status.current_soul->orientation_flags;
-    return isFemale(unit) && ! (orientation.whole & (orientation.mask_marry_male | orientation.mask_romance_male)) 
-        || ! isFemale(unit) && ! (orientation.whole & (orientation.mask_marry_female | orientation.mask_romance_female));
+    return (isFemale(unit) && ! (orientation.whole & (orientation.mask_marry_male | orientation.mask_romance_male)))
+        || (! isFemale(unit) && ! (orientation.whole & (orientation.mask_marry_female | orientation.mask_romance_female)));
+}
+
+bool isGelded(df::unit* unit)
+{
+    auto wounds = unit->body.wounds;
+    for(auto wound = wounds.begin(); wound != wounds.end(); ++wound)
+    {
+        auto parts = (*wound)->parts;
+        for (auto part = parts.begin(); part != parts.end(); ++part)
+        {
+            if ((*part)->flags2.bits.gelded)
+                return true;
+        }
+    }
+    return false;
 }
 
 // dump some unit info
@@ -759,7 +532,7 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
         break;
     }
     out << ")";
-    out << ", age: " << getUnitAge(unit);
+    out << ", age: " << getAge(unit, true);
 
     if(isTame(unit))
         out << ", tame";
@@ -783,7 +556,7 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
     if(verbose)
     {
         out << ". Pos: ("<<unit->pos.x << "/"<< unit->pos.y << "/" << unit->pos.z << ") " << endl;
-        out << "index in units vector: " << getUnitIndexFromId(unit) << endl;
+        out << "index in units vector: " << FindIndexById(unit->id) << endl;
     }
     out << endl;
 
@@ -826,41 +599,6 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
     }
 }
 
-bool isActivityZone(df::building * building)
-{
-    if(    building->getType() == building_type::Civzone
-        && building->getSubtype() == (short)civzone_type::ActivityZone)
-        return true;
-    else
-        return false;
-}
-
-bool isPenPasture(df::building * building)
-{
-    if(!isActivityZone(building))
-        return false;
-
-    df::building_civzonest * civ = (df::building_civzonest *) building;
-
-    if(civ->zone_flags.bits.pen_pasture)
-        return true;
-    else
-        return false;
-}
-
-bool isPitPond(df::building * building)
-{
-    if(!isActivityZone(building))
-        return false;
-
-    df::building_civzonest * civ = (df::building_civzonest *) building;
-
-    if(civ->zone_flags.bits.pit_pond) // && civ->pit_flags==0)
-        return true;
-    else
-        return false;
-}
-
 bool isCage(df::building * building)
 {
     return building->getType() == building_type::Cage;
@@ -871,128 +609,21 @@ bool isChain(df::building * building)
     return building->getType() == building_type::Chain;
 }
 
-bool isActive(df::building * building)
+// returns building of cage at cursor position (NULL if nothing found)
+df::building* findCageAtCursor()
 {
-    if(!isActivityZone(building))
-        return false;
-
-    df::building_civzonest * civ = (df::building_civzonest *) building;
-    if(civ->zone_flags.bits.active)
-        return true;
-    else
-        return false;
+    df::building* building = Buildings::findAtTile(Gui::getCursorPos());
+    if (isCage(building))
+        return building;
+    return NULL;
 }
 
-int32_t findBuildingIndexById(int32_t id)
+df::building* findChainAtCursor()
 {
-    for (size_t b = 0; b < world->buildings.all.size(); b++)
-    {
-        if(world->buildings.all.at(b)->id == id)
-            return b;
-    }
-    return -1;
-}
-
-int32_t findUnitIndexById(int32_t id)
-{
-    for (size_t i = 0; i < world->units.all.size(); i++)
-    {
-        if(world->units.all.at(i)->id == id)
-            return i;
-    }
-    return -1;
-}
-
-df::unit* findUnitById(int32_t id)
-{
-    int32_t index = findUnitIndexById(id);
-    if(index != -1)
-        return world->units.all[index];
-    else
-        return NULL;
-}
-
-// returns id of pen/pit at cursor position (-1 if nothing found)
-int32_t findPenPitAtCursor()
-{
-    int32_t foundID = -1;
-
-    if(cursor->x == -30000)
-        return -1;
-
-    for (size_t b = 0; b < world->buildings.all.size(); b++)
-    {
-        df::building* building = world->buildings.all[b];
-
-        // find zone under cursor
-        if (!(building->x1 <= cursor->x && cursor->x <= building->x2 &&
-            building->y1 <= cursor->y && cursor->y <= building->y2 &&
-            building->z == cursor->z))
-            continue;
-
-        if(isPenPasture(building) || isPitPond(building))
-        {
-            foundID = building->id;
-            break;
-        }
-    }
-    return foundID;
-}
-
-// returns id of cage at cursor position (-1 if nothing found)
-int32_t findCageAtCursor()
-{
-    int32_t foundID = -1;
-
-    if(cursor->x == -30000)
-        return -1;
-
-    for (size_t b = 0; b < world->buildings.all.size(); b++)
-    {
-        df::building* building = world->buildings.all[b];
-
-        if (!(building->x1 <= cursor->x && cursor->x <= building->x2 &&
-            building->y1 <= cursor->y && cursor->y <= building->y2 &&
-            building->z == cursor->z))
-            continue;
-
-        // don't set id if cage is not constructed yet
-        if(building->getBuildStage()!=building->getMaxBuildStage())
-            break;
-
-        if(isCage(building))
-        {
-            foundID = building->id;
-            break;
-        }
-    }
-    return foundID;
-}
-
-int32_t findChainAtCursor()
-{
-    int32_t foundID = -1;
-
-    if(cursor->x == -30000)
-        return -1;
-
-    for (size_t b = 0; b < world->buildings.all.size(); b++)
-    {
-        df::building* building = world->buildings.all[b];
-
-        // find zone under cursor
-        if (!(building->x1 <= cursor->x && cursor->x <= building->x2 &&
-            building->y1 <= cursor->y && cursor->y <= building->y2 &&
-            building->z == cursor->z))
-            continue;
-
-        if(isChain(building))
-        {
-            foundID = building->id;
-            break;
-        }
-    }
-    return foundID;
+    df::building* building = Buildings::findAtTile(Gui::getCursorPos());
+    if (isChain(building))
+        return building;
+    return NULL;
 }
 
 df::general_ref_building_civzone_assignedst * createCivzoneRef()
@@ -1266,7 +897,6 @@ bool isEmptyPasture(df::building* building)
 df::building* findFreeNestboxZone()
 {
     df::building * free_building = NULL;
-    bool cage = false;
     for (size_t b=0; b < world->buildings.all.size(); b++)
     {
         df::building* building = world->buildings.all[b];
@@ -1527,8 +1157,6 @@ command_result assignUnitToBuilding(color_ostream& out, df::unit* unit, df::buil
 
 command_result assignUnitsToCagezone(color_ostream& out, vector<df::unit*> units, df::building* building, bool verbose)
 {
-    command_result result = CR_WRONG_USAGE;
-
     if(!isPenPasture(building))
     {
         out << "A cage zone needs to be a pen/pasture containing at least one cage!" << endl;
@@ -1598,7 +1226,7 @@ command_result nickUnitsInZone(color_ostream& out, df::building* building, strin
     df::building_civzonest * civz = (df::building_civzonest *) building;
     for(size_t i = 0; i < civz->assigned_units.size(); i++)
     {
-        df::unit* unit = findUnitById(civz->assigned_units[i]);
+        df::unit* unit = df::unit::find(civz->assigned_units[i]);
         if(unit)
             Units::setNickname(unit, nick);
     }
@@ -1618,7 +1246,7 @@ command_result nickUnitsInCage(color_ostream& out, df::building* building, strin
     df::building_cagest* cage = (df::building_cagest*) building;
     for(size_t i=0; i<cage->assigned_units.size(); i++)
     {
-        df::unit* unit = findUnitById(cage->assigned_units[i]);
+        df::unit* unit = df::unit::find(cage->assigned_units[i]);
         if(unit)
             Units::setNickname(unit, nick);
     }
@@ -1653,10 +1281,7 @@ command_result nickUnitsInBuilding(color_ostream& out, df::building* building, s
 // dump some zone info
 void zoneInfo(color_ostream & out, df::building* building, bool verbose)
 {
-    if(building->getType()!= building_type::Civzone)
-        return;
-
-    if(building->getSubtype() != (short)civzone_type::ActivityZone)
+    if(!isActivityZone(building))
         return;
 
     string name;
@@ -1672,7 +1297,7 @@ void zoneInfo(color_ostream & out, df::building* building, bool verbose)
     out.print("\n");
 
     df::building_civzonest * civ = (df::building_civzonest *) building;
-    if(civ->zone_flags.bits.active)
+    if(isActive(civ))
         out << "active";
     else
         out << "not active";
@@ -1695,7 +1320,7 @@ void zoneInfo(color_ostream & out, df::building* building, bool verbose)
         << " z:" <<building->z
         << endl;
 
-    int32_t creaturecount = civ->assigned_units.size();
+    size_t creaturecount = civ->assigned_units.size();
     out << "Creatures in this zone: " << creaturecount << endl;
     for(size_t c = 0; c < creaturecount; c++)
     {
@@ -1735,7 +1360,7 @@ void cageInfo(color_ostream & out, df::building* building, bool verbose)
 
     df::building_cagest * cage = (df::building_cagest*) building;
 
-    int32_t creaturecount = cage->assigned_units.size();
+    size_t creaturecount = cage->assigned_units.size();
     out << "Creatures in this cage: " << creaturecount << endl;
     for(size_t c = 0; c < creaturecount; c++)
     {
@@ -1810,7 +1435,6 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     bool find_tame = false;
     bool find_not_tame = false;
     bool find_merchant = false;
-    bool find_not_merchant = false;
     bool find_male = false;
     bool find_not_male = false;
     bool find_female = false;
@@ -1847,7 +1471,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     bool verbose = false;
     bool all = false;
     bool unit_slaughter = false;
-    static int target_building = -1;
+    static df::building* target_building = NULL;
     bool nick_set = false;
     string target_nick = "";
 
@@ -1918,19 +1542,19 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                     if(new_building != -1)
                     {
                         i++;
-                        target_building = new_building;
-                        out << "Assign selected unit(s) to building #" << target_building <<std::endl;
+                        target_building = df::building::find(new_building);
+                        out << "Assign selected unit(s) to building #" << new_building <<std::endl;
                     }
                 }
             }
-            if(target_building == -1)
+            if(!target_building)
             {
                 out.printerr("No building id specified and current one is invalid!\n");
                 return CR_WRONG_USAGE;
             }
             else
             {
-                out << "No buiding id specified. Will try to use #" << target_building << endl;
+                out << "No buiding id specified. Will try to use #" << target_building->id << endl;
                 building_assign = true;
             }
         }
@@ -1951,18 +1575,18 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                 if(new_building != -1)
                 {
                     i++;
-                    target_building = new_building;
-                    out << "Assign selected unit(s) to cagezone #" << target_building <<std::endl;
+                    target_building = df::building::find(new_building);
+                    out << "Assign selected unit(s) to cagezone #" << new_building <<std::endl;
                 }
             }
-            if(target_building == -1)
+            if(!target_building)
             {
                 out.printerr("No building id specified and current one is invalid!\n");
                 return CR_WRONG_USAGE;
             }
             else
             {
-                out << "No buiding id specified. Will try to use #" << target_building << endl;
+                out << "No buiding id specified. Will try to use #" << target_building->id << endl;
                 cagezone_assign = true;
             }
         }
@@ -2243,7 +1867,6 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
         else if(p == "merchant" && invert_filter)
         {
             // actually 'not merchant' is pointless since merchant units are ignored by default
-            find_not_merchant = true;
             invert_filter=false;
         }
         else if(p == "milkable" && !invert_filter)
@@ -2365,21 +1988,13 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
     // (doesn't use the findXyzAtCursor() methods because zones might overlap and contain a cage or chain)
     if(zone_info) // || chain_info || cage_info)
     {
-        for (size_t b = 0; b < world->buildings.all.size(); b++)
-        {
-            df::building * building = world->buildings.all[b];
-
-            // find building under cursor
-            if (!all &&
-                !(building->x1 <= cursor->x && cursor->x <= building->x2 &&
-                  building->y1 <= cursor->y && cursor->y <= building->y2 &&
-                  building->z  == cursor->z))
-                continue;
-
-            zoneInfo(out, building, verbose);
-            chainInfo(out, building, verbose);
-            cageInfo(out, building, verbose);
-        }
+        vector<df::building_civzonest*> zones;
+        Buildings::findCivzonesAt(&zones, Gui::getCursorPos());
+        for (auto zone = zones.begin(); zone != zones.end(); ++zone)
+            zoneInfo(out, *zone, verbose);
+        df::building* building = Buildings::findAtTile(Gui::getCursorPos());
+        chainInfo(out, building, verbose);
+        cageInfo(out, building, verbose);
         return CR_OK;
     }
 
@@ -2389,14 +2004,14 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
         // cagezone wants a pen/pit as starting point
         if(!cagezone_assign)
             target_building = findCageAtCursor();
-        if(target_building != -1)
+        if(!target_building)
         {
             out << "Target building type: cage." << endl;
         }
         else
         {
-            target_building = findPenPitAtCursor();
-            if(target_building == -1)
+            target_building = findPenPitAt(Gui::getCursorPos());
+            if(!target_building)
             {
                 out << "No pen/pasture or pit under cursor!" << endl;
                 return CR_WRONG_USAGE;
@@ -2406,29 +2021,23 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                 out << "Target building type: pen/pasture or pit." << endl;
             }
         }
-        out << "Current building set to #" << target_building << endl;
+        out << "Current building set to #" << target_building->id << endl;
         return CR_OK;
     }
 
     if(building_assign || cagezone_assign || unit_info || unit_slaughter || nick_set)
     {
-        df::building * building;
         if(building_assign || cagezone_assign || (nick_set && !all && !find_count))
         {
-            // try to get building index from the id
-            int32_t index = findBuildingIndexById(target_building);
-            if(index == -1)
+            if (!target_building)
             {
                 out << "Invalid building id." << endl;
-                target_building = -1;
                 return CR_WRONG_USAGE;
             }
-            building = world->buildings.all.at(index);
-
             if(nick_set && !building_assign)
             {
                 out << "Renaming all units in target building." << endl;
-                return nickUnitsInBuilding(out, building, target_nick);
+                return nickUnitsInBuilding(out, target_building, target_nick);
             }
         }
 
@@ -2480,8 +2089,8 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                     || (find_not_war && isWar(unit))
                     || (find_hunter && !isHunter(unit))
                     || (find_not_hunter && isHunter(unit))
-                    || (find_agemin && getUnitAge(unit)<target_agemin)
-                    || (find_agemax && getUnitAge(unit)>target_agemax)
+                    || (find_agemin && (int) getAge(unit, true)<target_agemin)
+                    || (find_agemax && (int) getAge(unit, true)>target_agemax)
                     || (find_grazer && !isGrazer(unit))
                     || (find_not_grazer && isGrazer(unit))
                     || (find_egglayer && !isEggLayer(unit))
@@ -2536,7 +2145,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
                 }
                 else if(building_assign)
                 {
-                    command_result result = assignUnitToBuilding(out, unit, building, verbose);
+                    command_result result = assignUnitToBuilding(out, unit, target_building, verbose);
                     if(result != CR_OK)
                         return result;
                 }
@@ -2554,7 +2163,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             }
             if(cagezone_assign)
             {
-                command_result result = assignUnitsToCagezone(out, units_for_cagezone, building, verbose);
+                command_result result = assignUnitsToCagezone(out, units_for_cagezone, target_building, verbose);
                 if(result != CR_OK)
                     return result;
             }
@@ -2575,7 +2184,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
             }
             else if(building_assign)
             {
-                return assignUnitToBuilding(out, unit, building, verbose);
+                return assignUnitToBuilding(out, unit, target_building, verbose);
             }
             else if(unit_slaughter)
             {
@@ -2754,8 +2363,8 @@ command_result autoNestbox( color_ostream &out, bool verbose = false )
 // (assuming that the value from there indicates in which tick of the current year the unit was born)
 bool compareUnitAgesYounger(df::unit* i, df::unit* j)
 {
-    int32_t age_i = getUnitAge(i);
-    int32_t age_j = getUnitAge(j);
+    int32_t age_i = (int32_t) getAge(i, true);
+    int32_t age_j = (int32_t) getAge(j, true);
     if(age_i == 0 && age_j == 0)
     {
         age_i = i->relations.birth_time;
@@ -2765,8 +2374,8 @@ bool compareUnitAgesYounger(df::unit* i, df::unit* j)
 }
 bool compareUnitAgesOlder(df::unit* i, df::unit* j)
 {
-    int32_t age_i = getUnitAge(i);
-    int32_t age_j = getUnitAge(j);
+    int32_t age_i = (int32_t) getAge(i, true);
+    int32_t age_j = (int32_t) getAge(j, true);
     if(age_i == 0 && age_j == 0)
     {
         age_i = i->relations.birth_time;
@@ -2785,6 +2394,14 @@ bool compareUnitAgesOlder(df::unit* i, df::unit* j)
 //    maleAdult
 //};
 
+enum unit_ptr_index
+{
+ fk_index = 0,
+ mk_index = 1,
+ fa_index = 2,
+ ma_index = 3
+};
+
 struct WatchedRace
 {
 public:
@@ -2794,30 +2411,24 @@ public:
     int raceId;
 
     // target amounts
-    int fk; // max female kids
-    int mk; // max male kids
-    int fa; // max female adults
-    int ma; // max male adults
+    unsigned fk; // max female kids
+    unsigned mk; // max male kids
+    unsigned fa; // max female adults
+    unsigned ma; // max male adults
 
     // amounts of protected (not butcherable) units
-    int fk_prot;
-    int fa_prot;
-    int mk_prot;
-    int ma_prot;
+    unsigned fk_prot;
+    unsigned fa_prot;
+    unsigned mk_prot;
+    unsigned ma_prot;
 
     // butcherable units
-    vector <df::unit*> fk_ptr;
-    vector <df::unit*> mk_ptr;
-    vector <df::unit*> fa_ptr;
-    vector <df::unit*> ma_ptr;
+    vector <df::unit*> unit_ptr[4];
 
     // priority butcherable units
-    vector <df::unit*> fk_pri_ptr;
-    vector <df::unit*> mk_pri_ptr;
-    vector <df::unit*> fa_pri_ptr;
-    vector <df::unit*> ma_pri_ptr;
+    vector <df::unit*> prot_ptr[4];
 
-    WatchedRace(bool watch, int id, int _fk, int _mk, int _fa, int _ma)
+    WatchedRace(bool watch, int id, unsigned _fk, unsigned _mk, unsigned _fa, unsigned _ma)
     {
         isWatched = watch;
         raceId = id;
@@ -2837,7 +2448,7 @@ public:
     {
         if(!rconfig.isValid())
         {
-            string keyname = "autobutcher/watchlist/" + getRaceName(raceId);
+            string keyname = "autobutcher/watchlist/" + getRaceNameById(raceId);
             rconfig = World::GetPersistentData(keyname, NULL);
         }
         if(rconfig.isValid())
@@ -2852,7 +2463,7 @@ public:
         else
         {
             // this should never happen
-            string keyname = "autobutcher/watchlist/" + getRaceName(raceId);
+            string keyname = "autobutcher/watchlist/" + getRaceNameById(raceId);
             out << "Something failed, could not find/create config key " << keyname << "!" << endl;
         }
     }
@@ -2866,14 +2477,14 @@ public:
 
     void SortUnitsByAge()
     {
-        sort(fk_ptr.begin(), fk_ptr.end(), compareUnitAgesOlder);
-        sort(mk_ptr.begin(), mk_ptr.end(), compareUnitAgesOlder);
-        sort(fa_ptr.begin(), fa_ptr.end(), compareUnitAgesYounger);
-        sort(ma_ptr.begin(), ma_ptr.end(), compareUnitAgesYounger);
-        sort(fk_pri_ptr.begin(), fk_pri_ptr.end(), compareUnitAgesOlder);
-        sort(mk_pri_ptr.begin(), mk_pri_ptr.end(), compareUnitAgesOlder);
-        sort(fa_pri_ptr.begin(), fa_pri_ptr.end(), compareUnitAgesYounger);
-        sort(ma_pri_ptr.begin(), ma_pri_ptr.end(), compareUnitAgesYounger);
+        sort(unit_ptr[fk_index].begin(), unit_ptr[fk_index].end(), compareUnitAgesOlder);
+        sort(unit_ptr[mk_index].begin(), unit_ptr[mk_index].end(), compareUnitAgesOlder);
+        sort(unit_ptr[fa_index].begin(), unit_ptr[fa_index].end(), compareUnitAgesYounger);
+        sort(unit_ptr[ma_index].begin(), unit_ptr[ma_index].end(), compareUnitAgesYounger);
+        sort(prot_ptr[fk_index].begin(), prot_ptr[fk_index].end(), compareUnitAgesOlder);
+        sort(prot_ptr[mk_index].begin(), prot_ptr[mk_index].end(), compareUnitAgesOlder);
+        sort(prot_ptr[fa_index].begin(), prot_ptr[fa_index].end(), compareUnitAgesYounger);
+        sort(prot_ptr[ma_index].begin(), prot_ptr[ma_index].end(), compareUnitAgesYounger);
     }
 
     void PushUnit(df::unit * unit)
@@ -2881,16 +2492,16 @@ public:
         if(isFemale(unit))
         {
             if(isBaby(unit) || isChild(unit))
-                fk_ptr.push_back(unit);
+                unit_ptr[fk_index].push_back(unit);
             else
-                fa_ptr.push_back(unit);
+                unit_ptr[fa_index].push_back(unit);
         }
         else //treat sex n/a like it was male
         {
             if(isBaby(unit) || isChild(unit))
-                mk_ptr.push_back(unit);
+                unit_ptr[mk_index].push_back(unit);
             else
-                ma_ptr.push_back(unit);
+                unit_ptr[ma_index].push_back(unit);
         }
     }
 
@@ -2899,16 +2510,16 @@ public:
         if(isFemale(unit))
         {
             if(isBaby(unit) || isChild(unit))
-                fk_pri_ptr.push_back(unit);
+                prot_ptr[fk_index].push_back(unit);
             else
-                fa_pri_ptr.push_back(unit);
+                prot_ptr[fa_index].push_back(unit);
         }
         else
         {
             if(isBaby(unit) || isChild(unit))
-                mk_pri_ptr.push_back(unit);
+                prot_ptr[mk_index].push_back(unit);
             else
-                ma_pri_ptr.push_back(unit);
+                prot_ptr[ma_index].push_back(unit);
         }
     }
 
@@ -2933,17 +2544,14 @@ public:
     void ClearUnits()
     {
         fk_prot = fa_prot = mk_prot = ma_prot = 0;
-        fk_ptr.clear();
-        mk_ptr.clear();
-        fa_ptr.clear();
-        ma_ptr.clear();
-        fk_pri_ptr.clear();
-        mk_pri_ptr.clear();
-        fa_pri_ptr.clear();
-        ma_pri_ptr.clear();
+        for (size_t i = 0; i < 4; i++)
+        {
+            unit_ptr[i].clear();
+            prot_ptr[i].clear();
+        }
     }
 
-    int ProcessUnits(vector<df::unit*>& unit_ptr, vector<df::unit*>& unit_pri_ptr, int prot, int goal)
+    int ProcessUnits(vector<df::unit*>& unit_ptr, vector<df::unit*>& unit_pri_ptr, unsigned prot, unsigned goal)
     {
         int subcount = 0;
         while(unit_pri_ptr.size() && (unit_ptr.size() + unit_pri_ptr.size() + prot > goal) )
@@ -2967,10 +2575,10 @@ public:
     {
         SortUnitsByAge();
         int slaughter_count = 0;
-        slaughter_count += ProcessUnits(fk_ptr, fk_pri_ptr, fk_prot, fk);
-        slaughter_count += ProcessUnits(mk_ptr, mk_pri_ptr, mk_prot, mk);
-        slaughter_count += ProcessUnits(fa_ptr, fa_pri_ptr, fa_prot, fa);
-        slaughter_count += ProcessUnits(ma_ptr, ma_pri_ptr, ma_prot, ma);
+        slaughter_count += ProcessUnits(unit_ptr[fk_index], prot_ptr[fk_index], fk_prot, fk);
+        slaughter_count += ProcessUnits(unit_ptr[mk_index], prot_ptr[mk_index], mk_prot, mk);
+        slaughter_count += ProcessUnits(unit_ptr[fa_index], prot_ptr[fa_index], fa_prot, fa);
+        slaughter_count += ProcessUnits(unit_ptr[ma_index], prot_ptr[ma_index], ma_prot, ma);
         ClearUnits();
         return slaughter_count;
     }
@@ -2983,8 +2591,8 @@ std::vector<WatchedRace*> watched_races;
 // helper for sorting the watchlist alphabetically
 bool compareRaceNames(WatchedRace* i, WatchedRace* j)
 {
-    string name_i = getRaceNamePlural(i->raceId);
-    string name_j = getRaceNamePlural(j->raceId);
+    string name_i = getRaceNamePluralById(i->raceId);
+    string name_j = getRaceNamePluralById(j->raceId);
     
     return (name_i < name_j);
 }
@@ -2992,10 +2600,10 @@ bool compareRaceNames(WatchedRace* i, WatchedRace* j)
 static void autobutcher_sortWatchList(color_ostream &out);
 
 // default target values for autobutcher
-static int default_fk = 5;
-static int default_mk = 1;
-static int default_fa = 5;
-static int default_ma = 1;
+static unsigned default_fk = 5;
+static unsigned default_mk = 1;
+static unsigned default_fa = 5;
+static unsigned default_ma = 1;
 
 command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
 {
@@ -3011,12 +2619,10 @@ command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
     vector <string> target_racenames;
     vector <int> target_raceids;
 
-    int target_fk = default_fk;
-    int target_mk = default_mk;
-    int target_fa = default_fa;
-    int target_ma = default_ma;
-
-    int32_t target_raceid = -1;
+    unsigned target_fk = default_fk;
+    unsigned target_mk = default_mk;
+    unsigned target_fa = default_fa;
+    unsigned target_ma = default_ma;
 
     if(!parameters.size())
     {
@@ -3326,7 +2932,7 @@ command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
             bool found_race = false;
             for(size_t i=0; i<num_races; i++)
             {
-                if(getRaceName(i) == target_racenames.back())
+                if(getRaceNameById(i) == target_racenames.back())
                 {
                     target_raceids.push_back(i);
                     target_racenames.pop_back();
@@ -3463,7 +3069,7 @@ command_result autoButcher( color_ostream &out, bool verbose = false )
             watched_races.push_back(w);
 
             string announce;
-            announce = "New race added to autobutcher watchlist: " + getRaceNamePlural(w->raceId);
+            announce = "New race added to autobutcher watchlist: " + getRaceNamePluralById(w->raceId);
             Gui::showAnnouncement(announce, 2, false);
             autobutcher_sortWatchList(out);
         }
@@ -3481,7 +3087,8 @@ command_result autoButcher( color_ostream &out, bool verbose = false )
                 || isAvailableForAdoption(unit)
                 || unit->name.has_name )
                 w->PushProtectedUnit(unit);
-            else if (isGay(unit))
+            else if (   isGay(unit)
+                     || isGelded(unit))
                 w->PushPriorityUnit(unit);
             else
                 w->PushUnit(unit);
@@ -3499,7 +3106,7 @@ command_result autoButcher( color_ostream &out, bool verbose = false )
             stringstream ss;
             ss << slaughter_subcount;
             string announce;
-            announce = getRaceNamePlural(w->raceId) + " marked for slaughter: " + ss.str();
+            announce = getRaceNamePluralById(w->raceId) + " marked for slaughter: " + ss.str();
             Gui::showAnnouncement(announce, 2, false);
         }
     }
@@ -3827,7 +3434,7 @@ void butcherRace(int race)
         if(!isContainedInItem(unit) && !hasValidMapPos(unit))
             continue;
 
-        unit->flags2.bits.slaughter = true;
+        doMarkForSlaughter(unit);
     }
 }
 
@@ -3850,7 +3457,7 @@ void unbutcherRace(int race)
         if(!isContainedInItem(unit) && !hasValidMapPos(unit))
             continue;
 
-        unit->flags2.bits.slaughter = false;
+        unit->flags2.bits.slaughter = 0;
     }
 }
 
@@ -3936,7 +3543,7 @@ static void autobutcher_setWatchListRace(color_ostream &out, unsigned id, unsign
         watched_races.push_back(w);
 
         string announce;
-        announce = "New race added to autobutcher watchlist: " + getRaceNamePlural(w->raceId);
+        announce = "New race added to autobutcher watchlist: " + getRaceNamePluralById(w->raceId);
         Gui::showAnnouncement(announce, 2, false);
         autobutcher_sortWatchList(out);
     }
@@ -4031,7 +3638,7 @@ static int autobutcher_getWatchList(lua_State *L)
         WatchedRace * w = watched_races[i];
         Lua::SetField(L, w->raceId, ctable, "id");
         Lua::SetField(L, w->isWatched, ctable, "watched");
-        Lua::SetField(L, getRaceNamePlural(w->raceId), ctable, "name");
+        Lua::SetField(L, getRaceNamePluralById(w->raceId), ctable, "name");
         Lua::SetField(L, w->fk, ctable, "fk");
         Lua::SetField(L, w->mk, ctable, "mk");
         Lua::SetField(L, w->fa, ctable, "fa");
@@ -4040,31 +3647,31 @@ static int autobutcher_getWatchList(lua_State *L)
         int id = w->raceId;
         
         w = checkRaceStocksTotal(id);
-        Lua::SetField(L, w->fk_ptr.size(), ctable, "fk_total");
-        Lua::SetField(L, w->mk_ptr.size(), ctable, "mk_total");
-        Lua::SetField(L, w->fa_ptr.size(), ctable, "fa_total");
-        Lua::SetField(L, w->ma_ptr.size(), ctable, "ma_total");
+        Lua::SetField(L, w->unit_ptr[fk_index].size(), ctable, "fk_total");
+        Lua::SetField(L, w->unit_ptr[mk_index].size(), ctable, "mk_total");
+        Lua::SetField(L, w->unit_ptr[fa_index].size(), ctable, "fa_total");
+        Lua::SetField(L, w->unit_ptr[ma_index].size(), ctable, "ma_total");
         delete w;
 
         w = checkRaceStocksProtected(id);
-        Lua::SetField(L, w->fk_ptr.size(), ctable, "fk_protected");
-        Lua::SetField(L, w->mk_ptr.size(), ctable, "mk_protected");
-        Lua::SetField(L, w->fa_ptr.size(), ctable, "fa_protected");
-        Lua::SetField(L, w->ma_ptr.size(), ctable, "ma_protected");
+        Lua::SetField(L, w->unit_ptr[fk_index].size(), ctable, "fk_protected");
+        Lua::SetField(L, w->unit_ptr[mk_index].size(), ctable, "mk_protected");
+        Lua::SetField(L, w->unit_ptr[fa_index].size(), ctable, "fa_protected");
+        Lua::SetField(L, w->unit_ptr[ma_index].size(), ctable, "ma_protected");
         delete w;
 
         w = checkRaceStocksButcherable(id);
-        Lua::SetField(L, w->fk_ptr.size(), ctable, "fk_butcherable");
-        Lua::SetField(L, w->mk_ptr.size(), ctable, "mk_butcherable");
-        Lua::SetField(L, w->fa_ptr.size(), ctable, "fa_butcherable");
-        Lua::SetField(L, w->ma_ptr.size(), ctable, "ma_butcherable");
+        Lua::SetField(L, w->unit_ptr[fk_index].size(), ctable, "fk_butcherable");
+        Lua::SetField(L, w->unit_ptr[mk_index].size(), ctable, "mk_butcherable");
+        Lua::SetField(L, w->unit_ptr[fa_index].size(), ctable, "fa_butcherable");
+        Lua::SetField(L, w->unit_ptr[ma_index].size(), ctable, "ma_butcherable");
         delete w;
 
         w = checkRaceStocksButcherFlag(id);
-        Lua::SetField(L, w->fk_ptr.size(), ctable, "fk_butcherflag");
-        Lua::SetField(L, w->mk_ptr.size(), ctable, "mk_butcherflag");
-        Lua::SetField(L, w->fa_ptr.size(), ctable, "fa_butcherflag");
-        Lua::SetField(L, w->ma_ptr.size(), ctable, "ma_butcherflag");
+        Lua::SetField(L, w->unit_ptr[fk_index].size(), ctable, "fk_butcherflag");
+        Lua::SetField(L, w->unit_ptr[mk_index].size(), ctable, "mk_butcherflag");
+        Lua::SetField(L, w->unit_ptr[fa_index].size(), ctable, "fa_butcherflag");
+        Lua::SetField(L, w->unit_ptr[ma_index].size(), ctable, "ma_butcherflag");
         delete w;
 
         lua_rawseti(L, -2, i+1);
@@ -4160,7 +3767,7 @@ public:
                 int adjusted_item_index = i;
                 if (list_has_been_sorted)
                 {
-                    for (int j = 0; j < ui_building_assign_units->size(); j++)
+                    for (size_t j = 0; j < ui_building_assign_units->size(); j++)
                     {
                         if (ui_building_assign_units->at(j) == reference_list[i])
                         {

@@ -242,6 +242,9 @@ To include a double quote character, use ``\"`` inside double quotes.
 If the first non-whitespace character of a line is ``#``, the line is treated
 as a comment, i.e. a silent no-op command.
 
+When reading commands from dfhack.init or with the ``script`` command, if the final character on a line is a backslash then the next uncommented line is considered a continuation of that line, with the backslash deleted.
+Commented lines are skipped, so it is possible to comment out parts of a command with the ``#`` character.
+
 If the first non-whitespace character is ``:``, the command is parsed in a special
 alternative mode: first, non-whitespace characters immediately following the ``:``
 are used as the command name; the remaining part of the line, starting with the first
@@ -1885,6 +1888,9 @@ Creatures trained for war or hunting will be ignored as well.
 Creatures assigned to cages will be ignored if the cage is defined as a room
 (to avoid butchering unnamed zoo animals).
 
+Creatures who will not reproduce (because they're not interested in the opposite
+sex or have been gelded) have first priority for butchering.
+
 Once you have too much adults, the oldest will be butchered first.
 Once you have too much kids, the youngest will be butchered first.
 If you don't set any target count the following default will be used:
@@ -2222,6 +2228,7 @@ directory.
 
   Load and save stockpile settings from the 'q' menu.
   Usage:
+
       gui/stockpiles -save       to save the current stockpile
       gui/stockpiles -load       to load settings into the current stockpile
       gui/stockpiles -dir <path> set the default directory to save settings into
@@ -2351,11 +2358,11 @@ fortplan
 ========
 Usage: fortplan [filename]
 
-Designates furniture for building according to a .csv file with 
+Designates furniture for building according to a .csv file with
 quickfort-style syntax. Companion to digfort.
 
 The first line of the file must contain the following:
-   
+
    #build start(X; Y; <start location description>)
 
 ...where X and Y are the offset from the top-left corner of the file's area
@@ -2372,7 +2379,7 @@ are supported. All other characters are ignored. For example:
     `,f,`,t,`
     `,s,b,c,`
 
-This section of a file would designate for construction a door and some 
+This section of a file would designate for construction a door and some
 furniture inside a bedroom: specifically, clockwise from top left, a cabinet,
 a table, a chair, a bed, and a statue.
 

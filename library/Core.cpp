@@ -45,6 +45,7 @@ using namespace std;
 #include "PluginManager.h"
 #include "ModuleFactory.h"
 #include "modules/EventManager.h"
+#include "modules/Filesystem.h"
 #include "modules/Gui.h"
 #include "modules/World.h"
 #include "modules/Graphic.h"
@@ -252,7 +253,7 @@ static std::string getScriptHelp(std::string path, std::string helpprefix)
 static void listScripts(PluginManager *plug_mgr, std::map<string,string> &pset, std::string path, bool all, std::string prefix = "")
 {
     std::vector<string> files;
-    getdir(path, files);
+    Filesystem::listdir(path, files);
 
     for (size_t i = 0; i < files.size(); i++)
     {
@@ -824,22 +825,36 @@ bool Core::loadScriptFile(color_ostream &out, string fname, bool silent)
     if(!silent)
         out << "Loading script at " << fname << std::endl;
     ifstream script(fname.c_str());
-    if (script.good())
-    {
-        string command;
-        while (getline(script, command))
-        {
-            if (!command.empty())
-                runCommand(out, command);
-        }
-        return true;
-    }
-    else
+    if ( !script.good() )
     {
         if(!silent)
             out.printerr("Error loading script\n");
         return false;
     }
+    string command;
+    while(script.good()) {
+        string temp;
+        getline(script,temp);
+        bool doMore = false;
+        if ( temp.length() > 0 ) {
+            if ( temp[0] == '#' )
+                continue;
+            if ( temp[temp.length()-1] == '\r' )
+                temp = temp.substr(0,temp.length()-1);
+            if ( temp.length() > 0 ) {
+                if ( temp[temp.length()-1] == '\\' ) {
+                    temp = temp.substr(0,temp.length()-1);
+                    doMore = true;
+                }
+            }
+        }
+        command = command + temp;
+        if ( (!doMore || !script.good()) && !command.empty() ) {
+            runCommand(out, command);
+            command = "";
+        }
+    }
+    return true;
 }
 
 static void run_dfhack_init(color_ostream &out, Core *core)
