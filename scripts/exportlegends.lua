@@ -7,7 +7,7 @@ local vs = dfhack.gui.getCurViewscreen()
 local i = 1
 
 local MAPS = {
-    "Standard biome+site map",
+    "Standard biome+site",
     "Elevations including lake and ocean floors",
     "Elevations respecting water level",
     "Biome",
