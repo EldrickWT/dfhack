@@ -2,13 +2,19 @@
 -- author Putnam
 -- edited by expwnent
 -- Forces an event.
+--[[=begin
 
+modtools/force
+==============
+This tool triggers events like megabeasts, caravans, invaders, and migrants.
+
+=end]]
 local utils = require 'utils'
 
 local function findCiv(arg)
  local entities = df.global.world.entities.all
  if tonumber(arg) then return arg end
- if arg then 
+ if arg then
   for eid,entity in ipairs(entities) do
    if entity.entity_raw.code == arg then return entity end
   end

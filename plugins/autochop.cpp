@@ -1,6 +1,7 @@
-// automatically chop trees 
+// automatically chop trees
 
 #include "uicommon.h"
+#include "listcolumn.h"
 
 #include "Core.h"
 #include "Console.h"
@@ -549,7 +550,7 @@ public:
     }
 
     std::string getFocusString() { return "autochop"; }
-    
+
     void updateAutochopBurrows()
     {
         watchedBurrows.clear();
@@ -586,7 +587,7 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
         using namespace df::enums::ui_sidebar_mode;
         return (ui->main.mode == DesignateChopTrees);
     }
-    
+
     void sendKey(const df::interface_key &key)
     {
         set<df::interface_key> tmp;
@@ -599,7 +600,7 @@ struct autochop_hook : public df::viewscreen_dwarfmodest
         if (isInDesignationMenu() && input->count(interface_key::CUSTOM_C))
         {
             sendKey(interface_key::LEAVESCREEN);
-            Screen::show(new ViewscreenAutochop());
+            Screen::show(new ViewscreenAutochop(), plugin_self);
         }
         else
         {
@@ -642,7 +643,7 @@ command_result df_autochop (color_ostream &out, vector <string> & parameters)
             return CR_WRONG_USAGE;
     }
     if (Maps::IsValid())
-        Screen::show(new ViewscreenAutochop());
+        Screen::show(new ViewscreenAutochop(), plugin_self);
     return CR_OK;
 }
 

@@ -1,4 +1,22 @@
 # scan the map for ore veins
+=begin
+
+locate-ore
+==========
+Scan the map for metal ores.
+
+Finds and designate for digging one tile of a specific metal ore.
+Only works for native metal ores, does not handle reaction stuff (eg STEEL).
+
+When invoked with the ``list`` argument, lists metal ores available on the map.
+
+Examples::
+
+    locate-ore list
+    locate-ore hematite
+    locate-ore iron
+
+=end
 
 target_ore = $script_args[0]
 
@@ -20,10 +38,10 @@ def find_all_ore_veins
     }
 
     df.onstatechange_register_once { |st|
-	    if st == :MAP_LOADED
-		    $ore_veins = nil	# invalidate veins cache
-		    true
-	    end
+        if st == :MAP_LOADED
+            $ore_veins = nil    # invalidate veins cache
+            true
+        end
     }
 
     $ore_veins

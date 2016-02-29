@@ -1,7 +1,16 @@
 --scripts/modtools/random-trigger.lua
 --triggers random scripts
---register a few scripts, then tell it to "go" and it will pick a random one based on the probability weights you specified. outcomes are mutually exclusive. To make independent random events, call the script multiple times.
+--[[=begin
 
+modtools/random-trigger
+=======================
+This triggers random dfhack commands with specified probabilities.
+Register a few scripts, then tell it to "go" and it will pick one
+based on the probability weights you specified.  Outcomes are mutually
+exclusive. To make independent random events, call the script multiple
+times.
+
+=end]]
 local utils = require 'utils'
 local eventful = require 'plugins.eventful'
 
@@ -58,7 +67,7 @@ If you want multiple independent random events, call the script multiple times.
 99% of the time, you won't need to worry about this, but just in case, you can specify a name of a list of outcomes to prevent interference from other scripts that call this one.
 That also permits situations where you don't know until runtime what outcomes you want.
 For example, you could make a reaction-trigger that registers the worker as a mayor candidate, then run this script to choose a random mayor from the list of units that did the mayor reaction.
- 
+
 arguments:
     -help
         print this help message

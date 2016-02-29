@@ -11,6 +11,7 @@
 #include "modules/Gui.h"
 #include "modules/Items.h"
 #include "modules/Materials.h"
+#include "modules/World.h"
 
 #include "DataDefs.h"
 #include "df/game_type.h"
@@ -69,6 +70,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
 
 bool makeItem (df::reaction_product_itemst *prod, df::unit *unit, bool second_item = false)
 {
+    vector<df::reaction_product*> out_products;
     vector<df::item *> out_items;
     vector<df::reaction_reagent *> in_reag;
     vector<df::item *> in_items;
@@ -82,9 +84,9 @@ bool makeItem (df::reaction_product_itemst *prod, df::unit *unit, bool second_it
     if (dest_building != -1)
         building = df::building::find(dest_building);
 
-    prod->produce(unit, &out_items, &in_reag, &in_items, 1, job_skill::NONE,
+    prod->produce(unit, &out_products, &out_items, &in_reag, &in_items, 1, job_skill::NONE,
         df::historical_entity::find(unit->civ_id),
-        ((*gametype == game_type::DWARF_MAIN) || (*gametype == game_type::DWARF_RECLAIM)) ? df::world_site::find(ui->site_id) : NULL);
+        (World::isFortressMode()) ? df::world_site::find(ui->site_id) : NULL);
     if (!out_items.size())
         return false;
     // if we asked to make shoes and we got twice as many as we asked, then we're okay
@@ -326,7 +328,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
                     out.printerr("The creature you specified has no such caste!\n");
                     return CR_FAILURE;
                 }
-            } 
+            }
         }
         if (mat_type == -1)
         {
@@ -348,7 +350,7 @@ command_result df_createitem (color_ostream &out, vector <string> & parameters)
     df::unit *unit = Gui::getSelectedUnit(out, true);
     if (!unit)
     {
-        if (*gametype == game_type::ADVENTURE_ARENA || *gametype == game_type::ADVENTURE_MAIN)
+        if (*gametype == game_type::ADVENTURE_ARENA || World::isAdventureMode())
         {
             // Use the adventurer unit
             unit = world->units.active[0];

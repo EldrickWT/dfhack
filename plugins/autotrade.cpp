@@ -22,6 +22,7 @@
 using df::building_stockpilest;
 
 DFHACK_PLUGIN("autotrade");
+REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(world);
 REQUIRE_GLOBAL(cursor);
 REQUIRE_GLOBAL(ui);
@@ -142,7 +143,7 @@ static bool check_mandates(df::item *item)
         if (mandate->mode != 0)
             continue;
 
-        if (item->getType() != mandate->item_type || 
+        if (item->getType() != mandate->item_type ||
             (mandate->item_subtype != -1 && item->getSubtype() != mandate->item_subtype))
             continue;
 
@@ -421,14 +422,14 @@ struct trade_hook : public df::viewscreen_dwarfmodest
         int left_margin = dims.menu_x1 + 1;
         int x = left_margin;
         int y = dims.y2 - 5;
-        
+
         int links = 0;
         links += sp->links.give_to_pile.size();
         links += sp->links.take_from_pile.size();
         links += sp->links.give_to_workshop.size();
         links += sp->links.take_from_workshop.size();
         bool state = monitor.isMonitored(sp);
-        
+
         if (links + 12 >= y) {
             y = dims.y2;
             OutputString(COLOR_WHITE, x, y, "Auto: ");
@@ -465,9 +466,6 @@ DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 {
-    if (!gps)
-        return CR_FAILURE;
-
     if (enable != is_enabled)
     {
         depot_info.reset();

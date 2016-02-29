@@ -1,5 +1,14 @@
 -- On map load writes information about the loaded region to gamelog.txt
 -- By Kurik Amudnil and Warmist (http://www.bay12forums.com/smf/index.php?topic=91166.msg4467072#msg4467072)
+--[[=begin
+
+log-region
+==========
+When enabled in :file:`dfhack.init`, each time a fort is loaded identifying information
+will be written to the gamelog.  Assists in parsing the file if you switch
+between forts, and adds information for story-building.
+
+=end]]
 
 local function write_gamelog(msg)
     local log = io.open('gamelog.txt', 'a')
@@ -29,7 +38,7 @@ else
                 --site.name
                 --fort_ent.name
                 --civ_ent.name
-                
+
                 write_gamelog('Loaded '..world.cur_savegame.save_dir..', '..fullname(world.world_data)..
                   ' at coordinates ('..site.pos.x..','..site.pos.y..')'..NEWLINE..
                   'Loaded the fortress '..fullname(site)..

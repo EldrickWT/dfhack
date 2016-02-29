@@ -1,4 +1,5 @@
 #include "uicommon.h"
+#include "listcolumn.h"
 
 #include "df/viewscreen_dwarfmodest.h"
 #include "df/ui.h"
@@ -108,7 +109,7 @@ static bool close_hotkeys_screen()
         return false;
 
     Screen::dismiss(Core::getTopViewscreen());
-    for_each_(sorted_keys, [] (const string &sym) 
+    for_each_(sorted_keys, [] (const string &sym)
         { Core::getInstance().ClearKeyBindings(sym + "@dfhack/viewscreen_hotkeys"); });
     sorted_keys.clear();
     return true;
@@ -147,7 +148,7 @@ public:
         hotkeys_column.clear();
 
         int max_key_length = 0;
-        for_each_(sorted_keys, [&] (const string &sym) 
+        for_each_(sorted_keys, [&] (const string &sym)
         { if (sym.length() > max_key_length) { max_key_length = sym.length(); } });
         int padding = max_key_length + 2;
 
@@ -200,7 +201,7 @@ public:
 
         x += 3;
         OutputHotkeyString(x, y, "Invoke", "Enter or Hotkey");
-        
+
         x += 3;
         OutputToggleString(x, y, "Show Usage", "u", show_usage);
 
@@ -255,7 +256,7 @@ public:
         }
     }
 
-    virtual std::string getFocusString() 
+    virtual std::string getFocusString()
     {
         return "viewscreen_hotkeys";
     }
@@ -318,7 +319,7 @@ static command_result hotkeys_cmd(color_ostream &out, vector <string> & paramete
             if (Gui::getFocusString(top_screen) != "dfhack/viewscreen_hotkeys")
             {
                 find_active_keybindings(top_screen);
-                Screen::show(new ViewscreenHotkeys(top_screen));
+                Screen::show(new ViewscreenHotkeys(top_screen), plugin_self);
             }
         }
     }

@@ -72,6 +72,7 @@ namespace DFHack
 
     enum state_change_event
     {
+        SC_UNKNOWN = -1,
         SC_WORLD_LOADED = 0,
         SC_WORLD_UNLOADED = 1,
         SC_MAP_LOADED = 2,
@@ -81,6 +82,21 @@ namespace DFHack
         SC_BEGIN_UNLOAD = 6,
         SC_PAUSED = 7,
         SC_UNPAUSED = 8
+    };
+
+    class DFHACK_EXPORT StateChangeScript
+    {
+    public:
+        state_change_event event;
+        std::string path;
+        bool save_specific;
+        StateChangeScript(state_change_event event, std::string path, bool save_specific = false)
+            :event(event), path(path), save_specific(save_specific)
+        { }
+        bool operator==(const StateChangeScript& other)
+        {
+            return event == other.event && path == other.path && save_specific == other.save_specific;
+        }
     };
 
     // Core is a singleton. Why? Because it is closely tied to SDL calls. It tracks the global state of DF.
@@ -143,6 +159,11 @@ namespace DFHack
         command_result runCommand(color_ostream &out, const std::string &command);
         bool loadScriptFile(color_ostream &out, std::string fname, bool silent = false);
 
+        bool addScriptPath(std::string path, bool search_before = false);
+        bool removeScriptPath(std::string path);
+        std::string findScript(std::string name);
+        void getScriptPaths(std::vector<std::string> *dest);
+
         bool ClearKeyBindings(std::string keyspec);
         bool AddKeyBinding(std::string keyspec, std::string cmdline);
         std::vector<std::string> ListKeyBindings(std::string keyspec);
@@ -190,12 +211,13 @@ namespace DFHack
         void doUpdate(color_ostream &out, bool first_update);
         void onUpdate(color_ostream &out);
         void onStateChange(color_ostream &out, state_change_event event);
+        void handleLoadAndUnloadScripts(color_ostream &out, state_change_event event);
 
         Core(Core const&);              // Don't Implement
         void operator=(Core const&);    // Don't implement
 
         // report error to user while failing
-        void fatal (std::string output, bool will_deactivate);
+        void fatal (std::string output);
 
         // 1 = fatal failure
         bool errorstate;
@@ -213,6 +235,9 @@ namespace DFHack
         } s_mods;
         std::vector <Module *> allModules;
         DFHack::PluginManager * plug_mgr;
+
+        std::vector<std::string> script_paths[2];
+        tthread::mutex *script_path_mutex;
 
         // hotkey-related stuff
         struct KeyBinding {
@@ -240,6 +265,8 @@ namespace DFHack
         bool last_pause_state;
         // Very important!
         bool started;
+        // Additional state change scripts
+        std::vector<StateChangeScript> state_change_scripts;
 
         tthread::mutex * misc_data_mutex;
         std::map<std::string,void*> misc_data_map;

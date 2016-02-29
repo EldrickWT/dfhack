@@ -1,3 +1,13 @@
+# un-suspend construction jobs, on a recurring basis
+=begin
+
+autounsuspend
+=============
+Automatically unsuspend jobs in workshops, on a recurring basis.
+See `unsuspend` for one-off use, or `resume` ``all``.
+
+=end
+
 class AutoUnsuspend
     attr_accessor :running
 

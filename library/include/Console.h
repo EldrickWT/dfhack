@@ -157,6 +157,9 @@ namespace  DFHack
         bool isInited (void) { return inited; };
 
         bool is_console() { return true; }
+
+        bool hide();
+        bool show();
     private:
         Private * d;
         tthread::recursive_mutex * wlock;

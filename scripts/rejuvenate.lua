@@ -1,28 +1,29 @@
--- This script will make any "old" dwarf 20 years old
--- usage is:  target a unit in DF, and execute this script in dfhack
--- via ' lua /path/to/script '
--- the target will be changed to 20 years old
--- by vjek, version 3, 20130123, for DF(hack) 34.11 r2
--- Paise Armok!
+-- make the selected dwarf 20 years old
+-- by vjek
+--[[=begin
 
+rejuvenate
+==========
+Set the age of the selected dwarf to 20 years.  Useful if valuable citizens are
+getting old, or there are too many babies around...
+
+=end]]
 
 function rejuvenate()
-local current_year,newbirthyear
-unit=dfhack.gui.getSelectedUnit()
+    local current_year,newbirthyear
+    unit=dfhack.gui.getSelectedUnit()
 
-if unit==nil then
-	print ("No unit under cursor!  Aborting with extreme prejudice.")
-	return
-	end
-print (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).."was born in the year "..unit.relations.birth_year..".")
-current_year=df.global.cur_year
-print ("The current year is "..df.global.cur_year..".")
-newbirthyear=current_year - 20
-print ("The attempted new birth year is "..newbirthyear.. ".")
-if unit.relations.birth_year < newbirthyear then
-	unit.relations.birth_year=newbirthyear
-end
-print (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).."was born in the year "..unit.relations.birth_year..".")
+    if unit==nil then print ("No unit under cursor!  Aborting.") return end
+
+    current_year=df.global.cur_year
+    newbirthyear=current_year - 20
+    if unit.relations.birth_year < newbirthyear then
+        unit.relations.birth_year=newbirthyear
+    end
+    if unit.relations.old_year < current_year+100 then
+        unit.relations.old_year=current_year+100
+    end
+    print (dfhack.TranslateName(dfhack.units.getVisibleName(unit)).." is now 20 years old and will live at least 100 years")
 
 end
 

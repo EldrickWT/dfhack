@@ -51,7 +51,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
 
     bool isInPlannedBuildingQueryMode()
     {
-        return (ui->main.mode == df::ui_sidebar_mode::QueryBuilding || 
+        return (ui->main.mode == df::ui_sidebar_mode::QueryBuilding ||
             ui->main.mode == df::ui_sidebar_mode::BuildingItems) &&
             planner.getSelectedPlannedBuilding();
     }
@@ -91,7 +91,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
     {
         if (getNoblePositionOfSelectedBuildingOwner().size() > 0)
             return canReserveRoom(world->selected_building);
-        else 
+        else
             return false;
     }
 
@@ -119,7 +119,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
             {
                 show_help = true;
             }
-            
+
             if (is_planmode_enabled(type))
             {
                 if (planner.inQuickFortMode() && planner.in_dummmy_screen)
@@ -161,7 +161,7 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
                 }
                 else if (input->count(interface_key::CUSTOM_SHIFT_M))
                 {
-                    Screen::show(new ViewscreenChooseMaterial(planner.getDefaultItemFilterForType(type)));
+                    Screen::show(new ViewscreenChooseMaterial(planner.getDefaultItemFilterForType(type)), plugin_self);
                 }
                 else if (input->count(interface_key::CUSTOM_SHIFT_Q))
                 {
@@ -184,12 +184,12 @@ struct buildingplan_hook : public df::viewscreen_dwarfmodest
             {
                 planner.removeSelectedPlannedBuilding(); // Remove persistent data
             }
-            
+
         }
         else if (isInNobleRoomQueryMode())
         {
             auto np = getNoblePositionOfSelectedBuildingOwner();
-            df::interface_key last_token = *input->rbegin();
+            df::interface_key last_token = get_string_key(input);
             if (last_token >= interface_key::STRING_A048 && last_token <= interface_key::STRING_A058)
             {
                 int selection = last_token - interface_key::STRING_A048;
@@ -347,7 +347,7 @@ static command_result buildingplan_cmd(color_ostream &out, vector <string> & par
         {
             show_debugging = (toLower(parameters[1]) == "on");
             out << "Debugging " << ((show_debugging) ? "enabled" : "disabled") << endl;
-        }        
+        }
     }
 
     return CR_OK;

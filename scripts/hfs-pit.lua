@@ -1,5 +1,22 @@
 -- Creates a pit under the target leading straight to the Underworld.  Type '?' for help.
 -- Based on script by IndigoFenix, @ https://gist.github.com/IndigoFenix/8776696
+--[[=begin
+
+hfs-pit
+=======
+Creates a pit to the underworld at the cursor.
+
+Takes three arguments:  diameter of the pit in tiles, whether to wall off
+the pit, and whether to insert stairs.  If no arguments are given, the default
+is ``hfs-pit 1 0 0``, ie single-tile wide with no walls or stairs.::
+
+    hfs-pit 4 0 1
+    hfs-pit 2 1 0
+
+First example is a four-across pit with stairs but no walls; second is a
+two-across pit with stairs but no walls.
+
+=end]]
 
 args={...}
 
@@ -46,15 +63,15 @@ for x=pos.x-size,pos.x+size,1 do
                 if hitAir == true then
                     if not hitCeiling then
                         if block.global_feature ~= underworldLayer or z > 10 then hitCeiling = true end
-                        if stairs == 1 and x == pos.x and y == pos.y then 
+                        if stairs == 1 and x == pos.x and y == pos.y then
                             if block.tiletype[x%16][y%16] == 32 then
-                                if z == pos.z then 
+                                if z == pos.z then
                                     block.tiletype[x%16][y%16] = 56
-                                else 
-                                    block.tiletype[x%16][y%16] = 55 
+                                else
+                                    block.tiletype[x%16][y%16] = 55
                                 end
-                            else 
-                                block.tiletype[x%16][y%16] = 57 
+                            else
+                                block.tiletype[x%16][y%16] = 57
                             end
                         end
                     end
@@ -68,7 +85,7 @@ for x=pos.x-size,pos.x+size,1 do
                             elseif x == pos.x+size and y == pos.y-size then if needsWall == true then block.tiletype[x%16][y%16]=323 end
                             elseif x == pos.x-size or x == pos.x+size then if needsWall == true then block.tiletype[x%16][y%16]=324 end
                             elseif y == pos.y-size or y == pos.y+size then if needsWall == true then block.tiletype[x%16][y%16]=325 end
-                            elseif stairs == 1 and x == pos.x and y == pos.y then 
+                            elseif stairs == 1 and x == pos.x and y == pos.y then
                                 if z == pos.z then block.tiletype[x%16][y%16]=56
                                 else block.tiletype[x%16][y%16]=55 end
                             else block.tiletype[x%16][y%16]=32

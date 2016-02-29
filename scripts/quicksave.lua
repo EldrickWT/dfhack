@@ -1,7 +1,19 @@
 -- Makes the game immediately save the state.
+--[[=begin
+
+quicksave
+=========
+If called in dwarf mode, makes DF immediately saves the game by setting a flag
+normally used in seasonal auto-save.
+
+=end]]
 
 if not dfhack.isMapLoaded() then
     qerror("World and map aren't loaded.")
+end
+
+if not dfhack.world.isFortressMode() then
+    qerror('This script can only be used in fortress mode')
 end
 
 local ui_main = df.global.ui.main

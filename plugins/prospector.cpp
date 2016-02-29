@@ -18,6 +18,7 @@ using namespace std;
 #include "Console.h"
 #include "Export.h"
 #include "PluginManager.h"
+#include "modules/Gui.h"
 #include "modules/MapCache.h"
 
 #include "MiscUtils.h"
@@ -153,7 +154,7 @@ void printMats(color_ostream &con, MatMap &mat, std::vector<T*> &materials, bool
     {
         if(it->first >= materials.size())
         {
-            con << "Bad index: " << it->first << " out of " 
+            con << "Bad index: " << it->first << " out of "
                 <<  materials.size() << endl;
             continue;
         }
@@ -575,7 +576,8 @@ command_result prospector (color_ostream &con, vector <string> & parameters)
     CoreSuspender suspend;
 
     // Embark screen active: estimate using world geology data
-    if (VIRTUAL_CAST_VAR(screen, df::viewscreen_choose_start_sitest, Core::getTopViewscreen()))
+    auto screen = Gui::getViewscreenByType<df::viewscreen_choose_start_sitest>(0);
+    if (screen)
         return embark_prospector(con, screen, showHidden, showValue);
 
     if (!Maps::IsValid())

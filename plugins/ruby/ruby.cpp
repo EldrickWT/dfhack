@@ -175,7 +175,10 @@ DFhackCExport command_result plugin_eval_ruby( color_ostream &out, const char *c
 
     // if dlopen failed
     if (!r_thread)
+    {
+        out.printerr("Failed to load ruby library.\n");
         return CR_FAILURE;
+    }
 
     if (!strncmp(command, "nolock ", 7)) {
         // debug only!
@@ -324,7 +327,7 @@ static int df_loadruby(void)
 #if defined(WIN32)
         "./libruby.dll";
 #elif defined(__APPLE__)
-        "/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/lib/libruby.1.dylib";
+        "hack/libruby.dylib";
 #else
         "hack/libruby.so";
 #endif
@@ -483,7 +486,8 @@ static VALUE rb_cDFHack;
 // df-dfhack version (eg "0.34.11-r2")
 static VALUE rb_dfversion(VALUE self)
 {
-    return rb_str_new(DFHACK_VERSION, strlen(DFHACK_VERSION));
+    const char *dfhack_version = Version::dfhack_version();
+    return rb_str_new(dfhack_version, strlen(dfhack_version));
 }
 
 // enable/disable calls to DFHack.onupdate()

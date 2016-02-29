@@ -1,3 +1,11 @@
+
+--[[=begin
+
+gui/advfort_items
+=================
+Does something with items in adventure mode jobs.
+
+=end]]
 local _ENV = mkmodule('hack.scripts.gui.advfort_items')
 
 local gui=require('gui')
@@ -12,8 +20,10 @@ jobitemEditor.ATTRS{
     allow_remove=false,
     allow_any_item=false,
     job=DEFAULT_NIL,
+    job_items=DEFAULT_NIL,
     items=DEFAULT_NIL,
     on_okay=DEFAULT_NIL,
+    autofill=true,
 }
 function update_slot_text(slot)
     local items=""
@@ -23,15 +33,15 @@ function update_slot_text(slot)
             items=items..","
         end
     end
-    
+
     slot.text=string.format("%02d. Filled(%d/%d):%s",slot.id+1,slot.filled_amount,slot.job_item.quantity,items)
 end
 --items-> table => key-> id of job.job_items, value-> table => key (num), value => item(ref)
 function jobitemEditor:init(args)
     --self.job=args.job
-    if self.job==nil then qerror("This screen must have job target") end
+    if self.job==nil and self.job_items==nil then qerror("This screen must have job target or job_items list") end
     if self.items==nil then qerror("This screen must have item list") end
-    
+
     self:addviews{
             wid.Label{
                 view_id = 'label',
@@ -74,6 +84,9 @@ function jobitemEditor:init(args)
     }
     self.assigned={}
     self:fill()
+    if self.autofill then
+        self:fill_slots()
+    end
 end
 function jobitemEditor:get_slot()
     local idx,choice=self.subviews.itemList:getSelected()
@@ -104,6 +117,23 @@ function jobitemEditor:add_item()
     end
     )
 end
+function jobitemEditor:fill_slots()
+    for i,v in ipairs(self.slots) do
+        while v.filled_amount<v.job_item.quantity do
+            local added=false
+            for _,it in ipairs(v.choices) do
+                if not self.assigned[it.id] then
+                    self:add_item_to_slot(v,it)
+                    added=true
+                    break
+                end
+            end
+            if not added then
+                break
+            end
+        end
+    end
+end
 function jobitemEditor:add_item_to_slot(slot,item)
     table.insert(slot.items,item)
     slot.filled_amount=slot.filled_amount+item:getTotalDimension()
@@ -124,7 +154,15 @@ end
 function jobitemEditor:fill()
     self.slots={}
     for k,v in pairs(self.items) do
-        table.insert(self.slots,{job_item=self.job.job_items[k], id=k, items={},choices=v,filled_amount=0,slot_id=#self.slots})
+        local job_item
+
+        if self.job then
+            job_item=self.job.job_items[k]
+        else
+            job_item=self.job_items[k]
+        end
+
+        table.insert(self.slots,{job_item=job_item, id=k, items={},choices=v,filled_amount=0,slot_id=#self.slots})
         update_slot_text(self.slots[#self.slots])
     end
     self.subviews.itemList:setChoices(self.slots)
@@ -139,15 +177,21 @@ function jobitemEditor:jobValid()
     return true
 end
 function jobitemEditor:commit()
-    for _,slot in pairs(self.slots) do
-        for _1,cur_item in pairs(slot.items) do
-            self.job.items:insert("#",{new=true,item=cur_item,role=df.job_item_ref.T_role.Reagent,job_item_idx=slot.id})
+    if self.job then
+        for _,slot in pairs(self.slots) do
+            for _1,cur_item in pairs(slot.items) do
+                self.job.items:insert("#",{new=true,item=cur_item,role=df.job_item_ref.T_role.Reagent,job_item_idx=slot.id})
+            end
         end
     end
     self:dismiss()
-    if self.on_okay then self:on_okay() end
+    if self.on_okay then self.on_okay(self.slots) end
 end
-
+function jobitemEditor:onDestroy()
+    if self.on_close then
+        self.on_close()
+    end
+end
 function showItemEditor(job,item_selections)
     jobitemEditor{
         job = job,

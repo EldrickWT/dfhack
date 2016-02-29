@@ -95,13 +95,19 @@ Process::Process(VersionInfoFactory * factory)
     {
         return;
     }
-    VersionInfo* vinfo = factory->getVersionInfoByPETimestamp(d->pe_header.FileHeader.TimeDateStamp);
+    my_pe = d->pe_header.FileHeader.TimeDateStamp;
+    VersionInfo* vinfo = factory->getVersionInfoByPETimestamp(my_pe);
     if(vinfo)
     {
         identified = true;
         // give the process a data model and memory layout fixed for the base of first module
         my_descriptor  = new VersionInfo(*vinfo);
         my_descriptor->rebaseTo(getBase());
+    }
+    else
+    {
+        fprintf(stderr, "Unable to retrieve version information.\nPE timestamp: 0x%x\n", my_pe);
+        fflush(stderr);
     }
 }
 

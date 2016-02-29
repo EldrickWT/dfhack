@@ -21,6 +21,12 @@ using namespace google::protobuf::io;
 
 using namespace DFHack;
 using df::global::world;
+/*
+mapexport
+=========
+Export the current loaded map as a file. This was used by visualizers for
+DF 0.34.11, but is now basically obsolete.
+*/
 
 typedef std::vector<df::plant *> PlantList;
 
@@ -149,7 +155,7 @@ command_result mapexport (color_ostream &out, std::vector <std::string> & parame
     protomap.set_z_size(z_max);
 
     out << "Writing material dictionary..." << std::endl;
-    
+
     for (size_t i = 0; i < world->raws.inorganics.size(); i++)
     {
         dfproto::Material *protomaterial = protomap.add_inorganic_material();
@@ -173,10 +179,10 @@ command_result mapexport (color_ostream &out, std::vector <std::string> & parame
             constructionMaterials[construction->pos] = std::make_pair(construction->mat_index, construction->mat_type);
         }
     }
-        
+
     coded_output->WriteVarint32(protomap.ByteSize());
     protomap.SerializeToCodedStream(coded_output);
-    
+
     DFHack::t_feature blockFeatureGlobal;
     DFHack::t_feature blockFeatureLocal;
 
@@ -239,7 +245,7 @@ command_result mapexport (color_ostream &out, std::vector <std::string> & parame
                         prototile->set_tile_material(toProto(tileMaterial(type)));
 
                         df::coord map_pos = df::coord(b_x*16+x,b_y*16+y,z);
-                        
+
                         switch (tileMaterial(type))
                         {
                         case tiletype_material::SOIL:
@@ -300,7 +306,7 @@ command_result mapexport (color_ostream &out, std::vector <std::string> & parame
                     //    }
                     //}
                 }
-                
+
                 coded_output->WriteVarint32(protoblock.ByteSize());
                 protoblock.SerializeToCodedStream(coded_output);
             } // block x

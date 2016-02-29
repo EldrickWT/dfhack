@@ -37,6 +37,7 @@ using MapExtras::MapCache;
 using df::building_stockpilest;
 
 DFHACK_PLUGIN("autodump");
+REQUIRE_GLOBAL(gps);
 REQUIRE_GLOBAL(world);
 
 // Stockpile interface START
@@ -220,7 +221,7 @@ struct dump_hook : public df::viewscreen_dwarfmodest
         links += sp->links.give_to_workshop.size();
         links += sp->links.take_from_workshop.size();
         bool state = monitor.isMonitored(sp);
-        
+
         if (links + 12 >= y) {
             y = dims.y2;
             OutputString(COLOR_WHITE, x, y, "Auto: ");
@@ -254,9 +255,6 @@ DFHACK_PLUGIN_IS_ENABLED(is_enabled);
 
 DFhackCExport command_result plugin_enable(color_ostream &out, bool enable)
 {
-    if (!gps)
-        return CR_FAILURE;
-
     if (enable != is_enabled)
     {
         if (!INTERPOSE_HOOK(dump_hook, feed).apply(enable) ||

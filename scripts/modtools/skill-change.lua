@@ -3,7 +3,21 @@
 --based on skillChange.lua by Putnam
 --TODO: update skill level once experience increases/decreases
 --TODO: skill rust?
+--[[=begin
 
+modtools/skill-change
+=====================
+Sets or modifies a skill of a unit.  Args:
+
+:-help:             print the help message
+:-skill skillName:  set the skill that we're talking about
+:-mode (add/set):   are we adding experience/levels or setting them?
+:-granularity (experience/level):
+                    direct experience, or experience levels?
+:-unit id:          id of the target unit
+:-value amount:     how much to set/add
+
+=end]]
 local utils = require 'utils'
 
 validArgs = validArgs or utils.invert({
@@ -36,7 +50,7 @@ arguments
         set the skill that we're talking about
     -mode (add/set)
         are we adding experience/levels or setting them?
-    -granularity (experience/levels)
+    -granularity (experience/level)
         direct experience, or experience levels?
     -unit id
         id of the target unit
@@ -87,9 +101,9 @@ if args.granularity == granularity.experience then
  end
 elseif args.granularity == granularity.level then
  if args.mode == mode.set then
-  skill.rating = df.skill_rating[args.value]
+  skill.rating = args.value
  elseif args.mode == mode.add then
-  skill.rating = df.skill_rating[args.value + df.skill_rating[skill.rating]]
+  skill.rating = args.value + skill.rating
  else
   error 'bad mode'
  end

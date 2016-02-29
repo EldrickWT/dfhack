@@ -20,6 +20,11 @@ using namespace std;
 #include <df/unit_soul.h>
 #include <df/unit_labor.h>
 #include <df/unit_skill.h>
+/*
+dwarfexport
+===========
+Export dwarves to RuneSmith-compatible XML; also unused by modern tools.
+*/
 
 using namespace DFHack;
 using df::global::ui;
@@ -103,25 +108,25 @@ static void printAttributes(color_ostream &con, df::unit* cre, ostream& out) {
 
 static void printTraits(color_ostream &con, df::unit* cre, ostream& out)
 {
-    
+
     out << "    <Traits>" << endl;
     df::unit_soul * s = cre->status.current_soul;
     if (s)
     {
-        //FOR_ENUM_ITEMS(personality_facet_type,index)
-        //{
-        //    out << "      <Trait name='" << ENUM_KEY_STR(personality_facet_type, index) <<
-        //        "' value='" << s->traits[index] << "'>";
-        //    //FIXME: needs reimplementing trait string generation
-        //    /*
-        //    string trait = con->vinfo->getTrait(i, s->traits[i]);
-        //    if (!trait.empty()) {
-        //        out << trait.c_str();
-        //    }
-        //    */
-        //    out << "</Trait>" << endl;
-        //    
-        //}
+        FOR_ENUM_ITEMS(personality_facet_type,index)
+        {
+            out << "      <Trait name='" << ENUM_KEY_STR(personality_facet_type, index) <<
+                "' value='" << s->traits[index] << "'>";
+            //FIXME: needs reimplementing trait string generation
+            /*
+            string trait = con->vinfo->getTrait(i, s->traits[i]);
+            if (!trait.empty()) {
+                out << trait.c_str();
+            }
+            */
+            out << "</Trait>" << endl;
+
+        }
     }
     out << "    </Traits>" << endl;
 }
@@ -189,7 +194,7 @@ static void export_dwarf(color_ostream &con, df::unit* cre, ostream& out) {
     info += Translation::TranslateName(&cre->name, false);
     info[0] = toupper(info[0]);
     con.print("Exporting %s\n", info.c_str());
-    
+
     out << "  <Creature>" << endl;
     element("Name", info.c_str(), out);
     element("Nickname", cre->name.nickname.c_str(), out);
@@ -225,7 +230,7 @@ command_result export_dwarves (color_ostream &con, std::vector <std::string> & p
     uint32_t civ = ui->civ_id;
 
     outf << "<?xml version='1.0' encoding='ibm850'?>" << endl << "<Creatures>" << endl;
-    
+
     for (int i = 0; i < world->units.all.size(); ++i)
     {
         df::unit* cre = world->units.all[i];

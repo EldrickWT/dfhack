@@ -60,15 +60,16 @@ Process::Process(VersionInfoFactory * known_versions)
 
     identified = false;
     my_descriptor = 0;
+    my_pe = 0;
 
     md5wrapper md5;
     uint32_t length;
     uint8_t first_kb [1024];
     memset(first_kb, 0, sizeof(first_kb));
     // get hash of the running DF process
-    string hash = md5.getHashFromFile(real_path, length, (char *) first_kb);
+    my_md5 = md5.getHashFromFile(real_path, length, (char *) first_kb);
     // create linux process, add it to the vector
-    VersionInfo * vinfo = known_versions->getVersionInfoByMD5(hash);
+    VersionInfo * vinfo = known_versions->getVersionInfoByMD5(my_md5);
     if(vinfo)
     {
         my_descriptor = new VersionInfo(*vinfo);
@@ -79,7 +80,7 @@ Process::Process(VersionInfoFactory * known_versions)
         char * wd = getcwd(NULL, 0);
         cerr << "Unable to retrieve version information.\n";
         cerr << "File: " << real_path << endl;
-        cerr << "MD5: " << hash << endl;
+        cerr << "MD5: " << my_md5 << endl;
         cerr << "working dir: " << wd << endl;
         cerr << "length:" << length << endl;
         cerr << "1KB hexdump follows:" << endl;
@@ -143,6 +144,7 @@ behavior_strings[] = {
 
 void Process::getMemRanges( vector<t_memrange> & ranges )
 {
+    static bool log_ranges = (getenv("DFHACK_LOG_MEM_RANGES") != NULL);
 
     kern_return_t kr;
     task_t the_task;
@@ -188,8 +190,10 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
             temp.valid = true;
             ranges.push_back(temp);
 
-            /*fprintf(stderr,
-            "%08x-%08x %8uK %c%c%c/%c%c%c %11s %6s %10s uwir=%hu sub=%u dlname: %s\n",
+            if (log_ranges)
+            {
+                fprintf(stderr,
+                "%08x-%08x %8uK %c%c%c/%c%c%c %11s %6s %10s uwir=%hu sub=%u dlname: %s\n",
                             address, (address + vmsize), (vmsize >> 10),
                             (info.protection & VM_PROT_READ)        ? 'r' : '-',
                             (info.protection & VM_PROT_WRITE)       ? 'w' : '-',
@@ -202,7 +206,8 @@ void Process::getMemRanges( vector<t_memrange> & ranges )
                             behavior_strings[info.behavior],
                             info.user_wired_count,
                             info.reserved,
-                            dlinfo.dli_fname);*/
+                            dlinfo.dli_fname);
+            }
 
             address += vmsize;
         } else if (kr != KERN_INVALID_ADDRESS) {
@@ -255,16 +260,24 @@ uint32_t Process::getTickCount()
 
 string Process::getPath()
 {
+    static string cached_path = "";
+    if (cached_path.size())
+        return cached_path;
     char path[1024];
     char *real_path;
     uint32_t size = sizeof(path);
+    if (getcwd(path, size))
+    {
+        cached_path = string(path);
+        return cached_path;
+    }
     if (_NSGetExecutablePath(path, &size) == 0) {
         real_path = realpath(path, NULL);
     }
     std::string path_string(real_path);
     int last_slash = path_string.find_last_of("/");
-    std::string directory = path_string.substr(0,last_slash);
-    return directory;
+    cached_path = path_string.substr(0,last_slash);
+    return cached_path;
 }
 
 int Process::getPID()

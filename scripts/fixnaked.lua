@@ -1,3 +1,12 @@
+--removes unhappy thoughts due to lack of clothing
+--[[=begin
+
+fixnaked
+========
+Removes all unhappy thoughts due to lack of clothing.
+
+=end]]
+
 function fixnaked()
 local total_fixed = 0
 local total_removed = 0

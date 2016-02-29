@@ -1,5 +1,14 @@
 local utils = require('utils')
- 
+--[[=begin
+
+gaydar
+======
+Shows the sexual orientation of units, useful for social engineering or checking
+the viability of livestock breeding programs.  Use ``gaydar -help`` for information
+on available filters for orientation, citizenship, species, etc.
+
+=end]]
+
 validArgs = utils.invert({
   'all',
   'citizens',
@@ -12,7 +21,7 @@ validArgs = utils.invert({
   'help'
 })
 
- 
+
 local args = utils.processArgs({...}, validArgs)
 
 if args.help then
@@ -32,7 +41,7 @@ orientation filters:
     -notStraight
         shows only creatures who are not strictly straight
     -gayOnly
-        shows only creatures who are strictly gayOnly
+        shows only creatures who are strictly gay
     -biOnly
         shows only creatures who can get into romances with
         both sexes
@@ -40,7 +49,7 @@ orientation filters:
         shows only creatures who are strictly straight.
     -asexualOnly
         shows only creatures who are strictly asexual.
- 
+
     No argument will show the orientation of the unit
     under the cursor.
 ]])
@@ -63,6 +72,9 @@ local function determineorientation(unit)
  if unit.sex~=-1 then
   local return_string=''
   local orientation=unit.status.current_soul.orientation_flags
+  if orientation.indeterminate then
+   return 'indeterminate (probably adventurer)'
+  end
   local male_interested,asexual=false,true
   if orientation.romance_male then
    return_string=return_string..' likes males'
@@ -135,6 +147,7 @@ function isNotStraight(v)
  if v:find(string.char(12)) and v:find(' female') then return true end
  if v:find(string.char(11)) and v:find(' male') then return true end
  if v:find('asexual') then return true end
+ if v:find('indeterminate') then return true end
  return false
 end
 
@@ -146,7 +159,7 @@ function isGay(v)
 end
 
 function isAsexual(v)
- if v:find('asexual') then return true else return false end
+ if v:find('asexual') or v:find('indeterminate') then return true else return false end
 end
 
 function isBi(v)

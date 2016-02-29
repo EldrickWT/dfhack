@@ -1,4 +1,11 @@
 -- Show the internal path a unit is currently following.
+--[[=begin
+
+devel/unit-path
+===============
+Show the internal path a unit is currently following.
+
+=end]]
 
 local utils = require 'utils'
 local gui = require 'gui'
@@ -13,11 +20,16 @@ UnitPathUI.focus_path = 'unit-path'
 
 UnitPathUI.ATTRS {
     unit = DEFAULT_NIL,
+    has_path = false,
+    has_goal = false,
 }
 
 function UnitPathUI:init()
     self.saved_mode = df.global.ui.main.mode
-
+    if self.unit then
+        self.has_path = #self.unit.path.path.x > 0
+        self.has_goal = self.unit.path.dest.x >= 0
+    end
 end
 
 function UnitPathUI:onShow()
@@ -132,12 +144,11 @@ function UnitPathUI:onRenderBody(dc)
     end
 
     local cursor = guidm.getCursorPos()
-    local has_path = #self.unit.path.path.x>0
 
     local vp = self:getViewport()
     local mdc = gui.Painter.new(self.df_layout.map)
 
-    if not has_path then
+    if not self.has_path then
         if gui.blink_visible(120) then
             paintMapTile(mdc, vp, cursor, self.unit.pos, 15, COLOR_LIGHTRED, COLOR_RED)
         end
@@ -146,7 +157,7 @@ function UnitPathUI:onRenderBody(dc)
     else
         self:renderPath(mdc,vp,cursor)
 
-        dc:seek(1,6):pen(COLOR_GREEN):string(df.unit_path_goal[self.unit.path.goal])
+        dc:seek(1,6):pen(COLOR_GREEN):string(df.unit_path_goal[self.unit.path.goal] or '?')
     end
 
     dc:newline():pen(COLOR_GREY)
@@ -176,7 +187,7 @@ function UnitPathUI:onRenderBody(dc)
 
     dc:newline():newline(1):pen(COLOR_WHITE)
     dc:key('CUSTOM_Z'):string(": Zoom unit, ")
-    dc:key('CUSTOM_G'):string(": Zoom goal",COLOR_GREY,nil,has_path)
+    dc:key('CUSTOM_G'):string(": Zoom goal",COLOR_GREY,nil,self.has_goal)
     dc:newline(1)
     dc:key('CUSTOM_N'):string(": Zoom station",COLOR_GREY,nil,has_station)
     dc:newline():newline(1)
@@ -187,7 +198,7 @@ function UnitPathUI:onInput(keys)
     if keys.CUSTOM_Z then
         self:moveCursorTo(copyall(self.unit.pos))
     elseif keys.CUSTOM_G then
-        if #self.unit.path.path.x > 0 then
+        if self.has_goal then
             self:moveCursorTo(copyall(self.unit.path.dest))
         end
     elseif keys.CUSTOM_N then
@@ -199,6 +210,10 @@ function UnitPathUI:onInput(keys)
     elseif self:propagateMoveKeys(keys) then
         return
     end
+end
+
+function UnitPathUI:onGetSelectedUnit()
+    return self.unit
 end
 
 local unit = dfhack.gui.getSelectedUnit(true)

@@ -41,6 +41,7 @@ using namespace std;
 #include "Export.h"
 #include "PluginManager.h"
 #include "MiscUtils.h"
+#include "uicommon.h"
 
 #include "LuaTools.h"
 #include "DataFuncs.h"
@@ -148,7 +149,7 @@ const string zone_help_filters =
     "  caged        - in a built cage\n"
     "  own          - from own civilization\n"
     "  war          - trained war creature\n"
-    "  tamed        - tamed\n"
+    "  tame         - tamed\n"
     "  named        - has name or nickname\n"
     "                 can be used to mark named units for slaughter\n"
     "  merchant     - is a merchant / belongs to a merchant\n"
@@ -601,12 +602,12 @@ void unitInfo(color_ostream & out, df::unit* unit, bool verbose = false)
 
 bool isCage(df::building * building)
 {
-    return building->getType() == building_type::Cage;
+    return building && (building->getType() == building_type::Cage);
 }
 
 bool isChain(df::building * building)
 {
-    return building->getType() == building_type::Chain;
+    return building && (building->getType() == building_type::Chain);
 }
 
 // returns building of cage at cursor position (NULL if nothing found)
@@ -2004,7 +2005,7 @@ command_result df_zone (color_ostream &out, vector <string> & parameters)
         // cagezone wants a pen/pit as starting point
         if(!cagezone_assign)
             target_building = findCageAtCursor();
-        if(!target_building)
+        if(target_building)
         {
             out << "Target building type: cage." << endl;
         }
@@ -2593,7 +2594,7 @@ bool compareRaceNames(WatchedRace* i, WatchedRace* j)
 {
     string name_i = getRaceNamePluralById(i->raceId);
     string name_j = getRaceNamePluralById(j->raceId);
-    
+
     return (name_i < name_j);
 }
 
@@ -2806,21 +2807,17 @@ command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
 
     if(list_export)
     {
-        string run = "dfhack-run autobutcher ";
-#ifdef LINUX_BUILD
-        run = "./dfhack-run autobutcher ";
-#endif
         // force creation of config
-        out << run << "start" << endl;
+        out << "autobutcher start" << endl;
 
         if(!enable_autobutcher)
-            out << run << "stop" << endl;
+            out << "autobutcher stop" << endl;
 
         if (enable_autobutcher_autowatch)
-            out << run << "autowatch" << endl;
+            out << "autobutcher autowatch" << endl;
 
-        out << run << "sleep " << sleep_autobutcher << endl;
-        out << run << "target"
+        out << "autobutcher sleep " << sleep_autobutcher << endl;
+        out << "autobutcher target"
             << " " << default_fk
             << " " << default_mk
             << " " << default_fa
@@ -2833,7 +2830,7 @@ command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
             df::creature_raw * raw = world->raws.creatures.all[w->raceId];
             string name = raw->creature_id;
 
-            out << run << "target"
+            out << "autobutcher target"
                 << " " << w->fk
                 << " " << w->mk
                 << " " << w->fa
@@ -2841,7 +2838,7 @@ command_result df_autobutcher(color_ostream &out, vector <string> & parameters)
                 << " " << name << endl;
 
             if(w->isWatched)
-                out << run << "watch " << name << endl;
+                out << "autobutcher watch " << name << endl;
         }
         return CR_OK;
     }
@@ -3565,7 +3562,7 @@ static void autobutcher_removeFromWatchList(color_ostream &out, unsigned id)
 // sort watchlist alphabetically
 static void autobutcher_sortWatchList(color_ostream &out)
 {
-    sort(watched_races.begin(), watched_races.end(), compareRaceNames);   
+    sort(watched_races.begin(), watched_races.end(), compareRaceNames);
 }
 
 // set default target values for new races
@@ -3645,7 +3642,7 @@ static int autobutcher_getWatchList(lua_State *L)
         Lua::SetField(L, w->ma, ctable, "ma");
 
         int id = w->raceId;
-        
+
         w = checkRaceStocksTotal(id);
         Lua::SetField(L, w->unit_ptr[fk_index].size(), ctable, "fk_total");
         Lua::SetField(L, w->unit_ptr[mk_index].size(), ctable, "mk_total");
@@ -3708,12 +3705,6 @@ DFHACK_PLUGIN_LUA_COMMANDS {
 
 
 //START zone filters
-
-void OutputString(int8_t color, int &x, int y, const std::string &text)
-{
-    Screen::paintString(Screen::Pen(' ', color, 0), x, y, text);
-    x += text.length();
-}
 
 class zone_filter
 {
@@ -3780,7 +3771,7 @@ public:
                 saved_ui_building_assign_is_marked[saved_indexes[i]] = ui_building_assign_is_marked->at(adjusted_item_index);
             }
         }
-        
+
         string search_string_l = toLower(search_string);
         saved_indexes.clear();
         ui_building_assign_type->clear();
@@ -3802,7 +3793,7 @@ public:
                 continue;
 
             if (!show_noncaged)
-            {   
+            {
                 // must be in a container
                 if(!isContainedInItem(curr_unit))
                     continue;
@@ -3860,7 +3851,7 @@ public:
                 return false;
             }
 
-            df::interface_key last_token = *input->rbegin();
+            df::interface_key last_token = get_string_key(input);
             int charcode = Screen::keyToChar(last_token);
             if (charcode >= 32 && charcode <= 126)
             {
@@ -3884,31 +3875,31 @@ public:
             }
         }
         // Not in query typing mode
-        else if (input->count(interface_key::CUSTOM_SHIFT_G) && 
+        else if (input->count(interface_key::CUSTOM_SHIFT_G) &&
             (mode == ui_sidebar_mode::ZonesPenInfo || mode == ui_sidebar_mode::QueryBuilding))
         {
             show_non_grazers = !show_non_grazers;
             apply_filters();
         }
-        else if (input->count(interface_key::CUSTOM_SHIFT_C) && 
+        else if (input->count(interface_key::CUSTOM_SHIFT_C) &&
             (mode == ui_sidebar_mode::ZonesPenInfo || mode == ui_sidebar_mode::ZonesPitInfo || mode == ui_sidebar_mode::QueryBuilding))
         {
             show_noncaged = !show_noncaged;
             apply_filters();
         }
-        else if (input->count(interface_key::CUSTOM_SHIFT_P) && 
+        else if (input->count(interface_key::CUSTOM_SHIFT_P) &&
             (mode == ui_sidebar_mode::ZonesPenInfo || mode == ui_sidebar_mode::ZonesPitInfo || mode == ui_sidebar_mode::QueryBuilding))
         {
             show_pastured = !show_pastured;
             apply_filters();
         }
-        else if (input->count(interface_key::CUSTOM_SHIFT_M) && 
+        else if (input->count(interface_key::CUSTOM_SHIFT_M) &&
             (mode == ui_sidebar_mode::ZonesPenInfo || mode == ui_sidebar_mode::ZonesPitInfo || mode == ui_sidebar_mode::QueryBuilding))
         {
             show_male = !show_male;
             apply_filters();
         }
-        else if (input->count(interface_key::CUSTOM_SHIFT_F) && 
+        else if (input->count(interface_key::CUSTOM_SHIFT_F) &&
             (mode == ui_sidebar_mode::ZonesPenInfo || mode == ui_sidebar_mode::ZonesPitInfo || mode == ui_sidebar_mode::QueryBuilding))
         {
             show_female = !show_female;
@@ -3994,7 +3985,7 @@ public:
             OutputString(COLOR_WHITE, x, y, ": ");
             OutputString((show_male) ? COLOR_WHITE : COLOR_GREY, x, y, "Male");
         }
-        
+
         // pits don't have grazer filter because it seems pointless
         if (mode == ui_sidebar_mode::ZonesPitInfo)
         {
@@ -4064,8 +4055,10 @@ struct zone_hook : public df::viewscreen_dwarfmodest
                 ui_building_in_assign && *ui_building_in_assign &&
                 ui_building_assign_type && ui_building_assign_units &&
                 ui_building_assign_type->size() == ui_building_assign_units->size() &&
-                ui_building_item_cursor && 
-                world->selected_building && isCage(world->selected_building) ) 
+                ui_building_assign_type->size() == ui_building_assign_items->size() &&
+                ui_building_assign_type->size() == ui_building_assign_is_marked->size() &&
+                ui_building_item_cursor &&
+                world->selected_building && isCage(world->selected_building) )
             )
         {
             if (vector_get(*ui_building_assign_units, *ui_building_item_cursor))
