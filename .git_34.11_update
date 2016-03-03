@@ -1,24 +1,18 @@
-git stash save
 cd plugins/df2mc
-git checkout master
-git pull
+git pull origin master
 cd ../..
 cd plugins/stonesense
-git checkout master
-git pull
+git pull dfhackssense master
 cd ../..
 cd plugins/isoworld
-git checkout master
-git pull
+git pull origin master
 cd ../..
 cd library/xml
-git checkout master
-git pull
+git pull origin master
 cd ../..
 cd depends/clsocket
-git checkout master
-git pull
-cd ../..
-git checkout master
 git pull origin master
+cd ../..
+git stash save
+git pull dfhack develop
 git stash apply

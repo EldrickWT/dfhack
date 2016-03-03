@@ -24,13 +24,13 @@ using namespace DFHack;
 
 using df::global::world;
 
-DFHACK_PLUGIN("regrass");
+DFHACK_PLUGIN("regrass2");
 
-command_result df_regrass (color_ostream &out, vector <string> & parameters);
+command_result df_regrass2 (color_ostream &out, vector <string> & parameters);
 
 DFhackCExport command_result plugin_init (color_ostream &out, std::vector<PluginCommand> &commands)
 {
-    commands.push_back(PluginCommand("regrass", "Regrows surface grass.", df_regrass, false,
+    commands.push_back(PluginCommand("regrass2", "Regrows surface grass. Older Version.", df_regrass2, false,
         "Specify parameter 'max' to set all grass types to full density, otherwise only one type of grass will be restored per tile.\n"));
     return CR_OK;
 }
@@ -40,7 +40,7 @@ DFhackCExport command_result plugin_shutdown ( color_ostream &out )
     return CR_OK;
 }
 
-command_result df_regrass (color_ostream &out, vector <string> & parameters)
+command_result df_regrass2 (color_ostream &out, vector <string> & parameters)
 {
     bool max = false;
     if (!parameters.empty())

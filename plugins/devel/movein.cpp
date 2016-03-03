@@ -37,11 +37,6 @@ DFHACK_PLUGIN("movein");
 
 command_result movein (color_ostream &out, std::vector <std::string> & parameters);
 
-DFhackCExport const char * plugin_name ( void )
-{
-	return "movein";
-}
-
 // Mandatory init function. If you have some global state, create it here.
 DFhackCExport command_result plugin_init ( color_ostream &out, std::vector <PluginCommand> &commands)
 {
