@@ -52,6 +52,6 @@ tags
 
 # Mac OS X .DS_Store files
 .DS_Store
-.git_
+.git_*
 .gitignore
 run_it
