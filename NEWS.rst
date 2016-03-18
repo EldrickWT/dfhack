@@ -43,6 +43,11 @@ Internals
 
 - Prevented plugins with active viewscreens from being unloaded and causing a crash
 
+Lua
+---
+- `building-hacks` now supports ``auto_gears`` flags. It automatically finds and animates gears in building definition
+- Changed how `eventful` triggers reaction complete. Now it has ``onReactionComplete`` and ``onReactionCompleting``. Second one can be canceled
+
 New Plugins
 -----------
 - `autogems`: Creates a new Workshop Order setting, automatically cutting rough gems
@@ -68,6 +73,8 @@ New Features
     - ``tweak hide-priority``: Adds an option to hide designation priority indicators
     - ``tweak title-start-rename``: Adds a safe rename option to the title screen "Start Playing" menu
 
+- `colonies`: new ``place`` subcommand and supports any vermin (default honey bees)
+
 Fixes
 -----
 - Fixed a crash bug caused by the historical figures DFHack uses to store persistent data.
@@ -90,6 +97,7 @@ Fixes
     - Prevented a crash resulting from a bad civilization option
 
 - `showmood`: Fixed name display on OS X/Linux
+- `view-item-info`: Fixed density units
 
 Misc Improvements
 -----------------
@@ -98,6 +106,7 @@ Misc Improvements
 - `lua`: Now supports some built-in variables like `gui/gm-editor`, e.g. ``unit``, ``screen``
 - `stockflow`: Now offers better control over individual craft jobs
 - `weather`: now implemented by a script
+- `colonies`: now implemented by a script
 
 
 DFHack 0.40.24-r5
@@ -129,6 +138,14 @@ Misc Improvements
 - Unrecognized command feedback now includes more information about plugins
 - `fix/dry-buckets`: replaces the ``drybuckets`` plugin
 - `feature`: now implemented by a script
+
+Removed
+-------
+- DFusion: legacy script system, obsolete or replaced by better alternatives
+
+New Scripts
+-----------
+- `modtools/extra-gamelog`: replaces ``log-region``, ``soundsense-season``, and ``soundsense``
 
 DFHack 0.40.24-r4
 =================
